@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style><style>
+@font-face{font-family:"Optimistic";font-style:normal;font-weight:400 600;font-display:swap;src:url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");}
+:where(html){font-family:"Optimistic",system-ui,sans-serif}
+</style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="themes.js?v=13"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+#toastContainer{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:15000;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast-pro{background:var(--card);border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);min-width:260px;max-width:340px;pointer-events:auto;animation:toastIn .3s ease}
+.toast-pro.success{border-color:#16a34a;background:#f0fdf4}
+.toast-pro.error{border-color:#ef4444;background:#fef2f2}
+.toast-pro-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.toast-pro.success .toast-pro-icon{background:#dcfce7}
+.toast-pro.error .toast-pro-icon{background:#fee2e2}
+.toast-pro-text{flex:1}
+.toast-pro-title{font-size:10px;font-weight:800;color:var(--text)}
+.toast-pro-sub{font-size:8px;color:var(--text-soft);margin-top:1px}
+@keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes toastOut{from{transform:translateY(0);opacity:1}to{transform:translateY(20px);opacity:0}}
+
+:root{--hero:#16a34a;--bg:#f0fdf4;--bg-soft:#dcfce7;--card:#FFFFFF;--card-border:#bbf7d0;--text:#14532d;--text-soft:#15803d}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'IBM Plex Sans Arabic',sans-serif}
+html,body{max-width:430px;margin:0 auto !important;background:var(--bg);min-height:100dvh}
+body{border-left:1px solid var(--card-border);border-right:1px solid var(--card-border);height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+#app{flex:1;display:flex;flex-direction:column;background:var(--card);overflow:hidden;width:100%;position:relative}
+.nu-scroll::-webkit-scrollbar{width:0;display:none}
+.nu-scroll{scrollbar-width:none}
+.filter-chip{padding:6px 10px;border-radius:99px;border:1px solid var(--card-border);background:var(--card);font-size:9.8px;font-weight:800;cursor:pointer;white-space:nowrap;color:var(--text-soft)}
+.filter-chip.active{background:var(--hero);color:#fff;border-color:var(--hero)}
+#deleteWarningModal,#cameraModal,#voiceModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:12000;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(8px)}
+#deleteWarningModal.show,#cameraModal.show,#voiceModal.show{display:flex}
+#board{flex:1;overflow:auto;padding:7px 7px 90px 7px;display:flex;flex-direction:column;gap:7px;background:var(--bg)}
+.task-outer{display:flex;gap:6px;align-items:stretch}
+.task-card{flex:1;background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:10px 11px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;position:relative;overflow:hidden}
+.task-progress-full{position:absolute;top:0;right:0;bottom:0;pointer-events:none;transition:width .35s ease;z-index:0}
+.task-card-content{position:relative;z-index:1}
+
+.ext-del{width:38px;border-radius:11px;border:1px solid #FECDD3;background:#FFF1F2;color:#ef4444;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#fab{position:absolute;bottom:18px;left:18px;width:56px;height:56px;border-radius:18px;background:var(--hero);color:#fff;border:none;font-size:28px;font-weight:800;box-shadow:0 10px 26px rgba(22,163,74,.38);cursor:pointer;z-index:20;display:flex;align-items:center;justify-content:center}
+#modal{display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;flex-direction:column;max-width:430px;margin:0 auto;left:0;right:0}
+.pro-header{padding:10px 12px;background:var(--card);border-bottom:1px solid var(--card-border);display:flex;align-items:center;gap:10px;position:relative}
+.pro-header::before{content:'';position:absolute;top:0;right:0;left:0;height:4px;background:var(--hero-color,var(--hero))}
+.pro-title-input{flex:1;border:none;outline:none;background:transparent;font-size:16px;font-weight:800;color:var(--text);width:100%}
+.pro-close{width:34px;height:34px;border-radius:10px;background:var(--bg-soft);border:1px solid var(--card-border);color:var(--text);font-size:14px;cursor:pointer;flex-shrink:0}
+.pro-meta{background:var(--card);padding:8px 12px;display:flex;gap:8px;border-bottom:1px solid var(--card-border);align-items:center}
+.pro-select{flex:1;border:1px solid var(--card-border);background:var(--bg-soft);border-radius:10px;padding:8px 10px;font-size:11px;font-weight:700;color:var(--text);outline:none}
+.pro-segment{display:flex;gap:3px;background:var(--bg-soft);padding:4px;border-radius:12px;margin:10px 12px;border:1px solid var(--card-border);overflow:auto}
+.pro-seg-btn{flex:1;padding:8px 6px;border:none;border-radius:8px;background:transparent;font-size:9.8px;font-weight:800;color:var(--text-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+.pro-seg-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid var(--card-border)}
+.pane{display:none;flex:1;flex-direction:column;padding:0 12px 12px;overflow:auto}
+.pane.active{display:flex}
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:10px}
+.input-pro{width:100%;border:1px solid var(--card-border);border-radius:10px;padding:9px 10px;background:var(--bg);color:var(--text);font-size:11.5px;font-weight:600;outline:none}
+.excel-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.color-cell{width:100%;aspect-ratio:1;border-radius:7px;border:1px solid var(--card-border);cursor:pointer}
+.inner-tab-row{display:flex;gap:6px;overflow:auto;padding-bottom:6px}
+.inner-tab-pill{padding:7px 12px;border-radius:99px;border:1px solid var(--card-border);background:var(--card);font-size:10.5px;font-weight:700;color:var(--text-soft);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.inner-tab-pill.active{background:var(--hero);color:#fff;border-color:var(--hero)}
+.media-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.media-btn{border:1px solid var(--card-border);background:var(--card);border-radius:14px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.media-btn-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.media-btn-label{font-size:9.5px;font-weight:800;color:var(--text)}
+.media-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.media-item{position:relative;border:1px solid var(--card-border);border-radius:14px;overflow:hidden;background:var(--bg-soft);aspect-ratio:1}
+.media-item img{width:100%;height:100%;object-fit:cover}
+.media-del{position:absolute;top:6px;left:6px;width:28px;height:28px;border-radius:50%;background:rgba(239,68,68,.92);color:#fff;border:none;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.audio-item{grid-column:span 2;display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:10px}
+
+/* PRO EDITOR */
+.notes-wrapper{display:flex;flex-direction:column;flex:1;min-height:55vh;background:var(--card);border:1px solid var(--card-border);border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+.pro-toolbar-pro{position:sticky;top:0;z-index:10;background:var(--card);border-bottom:1px solid var(--card-border);padding:6px 8px;display:flex;gap:6px;overflow-x:auto;align-items:center;flex-shrink:0;direction:rtl}
+.toolbar-group{display:flex;gap:4px;padding:3px 6px;background:var(--bg-soft);border:1px solid var(--card-border);border-radius:9px;align-items:center;flex-shrink:0}
+.tool-btn{width:34px;height:34px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--text);font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
+.tool-btn:hover{background:var(--card);border-color:var(--card-border)}
+.tool-btn.active{background:var(--hero);color:#fff;border-color:var(--hero)}
+.tool-btn.color{width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--card-border)}
+.rich-editor-pro{flex:1;min-height:38vh;border:none;outline:none;background:var(--card);padding:16px 14px;line-height:2.1;overflow:auto;direction:rtl;text-align:right;white-space:pre-wrap;word-break:break-word;color:var(--text);font-size:14px}
+.rich-editor-pro:empty:before{content:attr(placeholder);color:var(--text-soft);opacity:.55;font-size:13px}
+.rich-editor-pro h1{font-size:22px;font-weight:800;margin:14px 0 8px;line-height:1.4}
+.rich-editor-pro h2{font-size:18px;font-weight:800;margin:12px 0 6px;color:var(--text)}
+.rich-editor-pro h3{font-size:15px;font-weight:800;margin:10px 0 6px;color:var(--text-soft)}
+.rich-editor-pro blockquote{border-right:3px solid var(--hero);background:var(--bg-soft);padding:8px 12px;border-radius:8px 0 0 8px;margin:10px 0;font-style:italic}
+.rich-editor-pro ul,.rich-editor-pro ol{padding-right:22px;margin:8px 0;list-style-position:outside}
+.rich-editor-pro li{margin:4px 0}
+.rich-editor-pro .checklist{display:flex;gap:8px;align-items:flex-start;margin:6px 0;background:var(--bg-soft);padding:6px 8px;border-radius:8px;border:1px solid var(--card-border)}
+.editor-footer{padding:8px 12px;background:var(--bg-soft);border-top:1px solid var(--card-border);display:flex;justify-content:space-between;align-items:center;font-size:9px;color:var(--text-soft)}
+</style><script src="drive-sync.js?v=15"></script></head><body>
+<div id="app">
+<div style="padding:9px 11px;border-bottom:1px solid var(--card-border);display:flex;justify-content:space-between;align-items:center;background:var(--card);position:sticky;top:0;z-index:5">
+<div style="display:flex;gap:9px;align-items:center;"><div style="width:36px;height:36px;background:var(--hero);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px">✦</div><div><div style="font-weight:800;font-size:12.6px;color:var(--text)">مساحة العمل</div><div id="stats" style="font-size:9.2px;color:var(--text-soft);">0 مهام</div></div></div>
+<div style="display:flex;gap:5px;"><button onclick="openManager()" style="background:var(--bg-soft);border:1px solid var(--card-border);padding:7px 9px;border-radius:8px;cursor:pointer;font-weight:700;color:var(--text);font-size:9.2px">⚙ إدارة</button><button onclick="addQuick()" style="background:var(--hero);color:#fff;border:none;padding:7px 11px;border-radius:8px;font-weight:800;cursor:pointer;font-size:9.2px">+ جديد</button></div>
+</div>
+<div style="padding:7px;background:var(--bg-soft);border-bottom:1px solid var(--card-border);">
+<input id="mainInput" placeholder="اكتب مهمة جديدة واضغط إضافة..." style="width:100%;background:var(--card);border:1px solid var(--card-border);padding:8px 9px;border-radius:9px;outline:none;font-weight:700;color:var(--text);font-size:11.5px">
+<div style="display:flex;gap:5px;margin-top:7px;align-items:center;"><select id="cat" style="flex:1;background:var(--card);border:1px solid var(--card-border);border-radius:8px;padding:7px;font-weight:700;color:var(--text);font-size:10.3px"></select><div id="quickColors" style="display:flex;gap:5px;flex:1;overflow:auto" class="nu-scroll"></div><button onclick="doAdd()" style="background:var(--hero);color:#fff;border:none;border-radius:8px;padding:7px 11px;font-weight:900;cursor:pointer;font-size:10.3px">إضافة</button></div>
+</div>
+<div style="background:var(--card);border-bottom:1px solid var(--card-border);padding:7px 9px;"><div id="taskTabsFilter" style="display:flex;gap:5px;overflow:auto" class="nu-scroll">
+<button onclick="filterTasksTab('all')" id="tt_all" class="filter-chip active">الكل</button>
+<div id="dynamicCatsChips" style="display:contents"></div>
+<button onclick="filterTasksTab('done')" id="tt_done" class="filter-chip">✓ منجز</button>
+<button onclick="filterTasksTab('hidden')" id="tt_hidden" class="filter-chip" style="display:none">🔒 مخفي</button>
+</div></div>
+<div id="board" class="nu-scroll"></div>
+<button id="fab" onclick="openNewTaskModal()">+</button>
+</div>
+
+<div id="deleteWarningModal" onclick="if(event.target==this)closeDeleteWarning()"><div style="background:var(--card);width:100%;max-width:345px;border-radius:18px;overflow:hidden;border:1px solid var(--card-border)"><div style="background:#FEF2F2;padding:14px;text-align:center"><div style="font-size:28px">⚠️</div><div style="font-weight:900;color:#991B1B;font-size:12.6px">هتحذف؟</div></div><div style="padding:11px"><div id="delTaskPreview" style="background:var(--bg-soft);border:1px solid var(--card-border);border-radius:9px;padding:9px;margin-bottom:9px;font-size:11.5px"></div><label style="display:flex;gap:7px;align-items:center;background:var(--bg-soft);border:1px solid var(--card-border);border-radius:9px;padding:8px"><input type="checkbox" id="delConfirmCheck" onchange="toggleDelBtn()"><span style="font-size:10.3px;font-weight:700">أنا متأكد</span></label><div style="display:flex;gap:9px;margin-top:9px"><button onclick="closeDeleteWarning()" style="flex:1;background:var(--bg-soft);border:1px solid var(--card-border);padding:9px;border-radius:9px;font-size:10.3px">إلغاء</button><button id="finalDelBtn" onclick="confirmDelete()" disabled style="flex:1;background:#E5E7EB;color:#9CA3AF;border:none;padding:9px;border-radius:9px;font-weight:800;font-size:10.3px">حذف</button></div></div></div></div>
+
+<div id="cameraModal"><div style="background:var(--card);width:100%;max-width:380px;border-radius:20px;overflow:hidden;border:1px solid var(--card-border)"><div style="position:relative;background:#000"><video id="cameraVideo" autoplay playsinline style="width:100%;aspect-ratio:3/4;object-fit:cover"></video><canvas id="cameraCanvas" style="display:none"></canvas><button onclick="closeCamera()" style="position:absolute;top:12px;left:12px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;font-size:16px">✕</button></div><div style="padding:14px;display:flex;gap:10px;justify-content:center;background:var(--card)"><button onclick="capturePhoto()" style="width:64px;height:64px;border-radius:50%;background:var(--hero);border:4px solid var(--bg-soft);color:#fff;font-size:24px;box-shadow:0 4px 14px rgba(22,163,74,.35)">📸</button></div></div></div>
+
+<div id="voiceModal"><div style="background:var(--card);width:100%;max-width:340px;border-radius:20px;overflow:hidden;border:1px solid var(--card-border);padding:18px;text-align:center"><div style="font-size:12px;font-weight:800;color:var(--text)">🎙️ تسجيل صوتي</div><div id="voiceTimer" style="font-size:32px;font-weight:800;color:var(--hero);margin:16px 0;font-variant-numeric:tabular-nums">00:00</div><div id="voiceWave" style="display:flex;gap:3px;justify-content:center;align-items:center;height:40px;margin-bottom:16px"><div style="width:4px;height:12px;background:var(--hero);border-radius:99px;animation:wave 1s infinite"></div><div style="width:4px;height:24px;background:var(--hero);border-radius:99px;animation:wave 1s .1s infinite"></div><div style="width:4px;height:18px;background:var(--hero);border-radius:99px;animation:wave 1s .2s infinite"></div><div style="width:4px;height:30px;background:var(--hero);border-radius:99px;animation:wave 1s .3s infinite"></div><div style="width:4px;height:14px;background:var(--hero);border-radius:99px;animation:wave 1s .4s infinite"></div></div><style>@keyframes wave{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.2)}}</style><div style="display:flex;gap:8px"><button onclick="closeVoice()" style="flex:1;background:var(--bg-soft);border:1px solid var(--card-border);padding:10px;border-radius:10px;font-weight:700">إلغاء</button><button id="voiceActionBtn" onclick="toggleVoiceRecord()" style="flex:1;background:#ef4444;color:#fff;border:none;padding:10px;border-radius:10px;font-weight:800">● بدء التسجيل</button></div></div></div>
+
+<div id="toastContainer"></div>
+<div id="managerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;align-items:center;justify-content:center;padding:11px"><div style="background:var(--card);width:100%;max-width:437px;border-radius:16px;overflow:hidden;max-height:85vh;display:flex;flex-direction:column;border:1px solid var(--card-border)"><div style="display:flex;gap:4px;background:var(--bg-soft);margin:9px;padding:4px;border-radius:9px"><button onclick="mTab('cats')" id="mTabCats" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--card);font-weight:700;color:var(--text);font-size:10.3px">📁 التصنيفات</button><button onclick="mTab('colors')" id="mTabColors" style="flex:1;padding:7px;border:none;border-radius:7px;background:transparent;color:var(--text-soft);font-size:10.3px">🎨 الألوان</button></div><div style="flex:1;overflow:auto;padding:0 11px 11px" class="nu-scroll"><div id="mCats"><div style="display:flex;gap:5px;margin-bottom:11px"><input id="newCatEmoji" placeholder="💊" style="width:41px;text-align:center;border:1px solid var(--card-border);border-radius:8px;padding:7px;background:var(--card);color:var(--text);font-size:11.5px"><input id="newCatName" placeholder="اسم التصنيف" style="flex:1;border:1px solid var(--card-border);border-radius:8px;padding:7px;background:var(--card);color:var(--text);font-size:11.5px"><button onclick="addCategory()" style="background:var(--hero);color:#fff;border:none;padding:7px 11px;border-radius:8px;font-size:11.5px">+</button></div><div id="catList"></div></div><div id="mColors" style="display:none"><div id="excelTheme" class="excel-grid"></div><div id="excelStandard" class="excel-grid" style="margin-top:9px"></div></div></div><div style="padding:9px 11px;border-top:1px solid var(--card-border)"><button onclick="closeManager()" style="width:100%;background:var(--bg-soft);border:1px solid var(--card-border);padding:8px;border-radius:9px;color:var(--text);font-size:10.3px">إغلاق</button></div></div></div>
+
+<div id="modal">
+  <div class="pro-header" id="modalCover">
+    <input id="modalTitle" class="pro-title-input" placeholder="عنوان المهمة..." />
+    <button class="pro-close" onclick="closeModal()">✕</button>
+  </div>
+  <div class="pro-meta">
+    <select id="modalCat" class="pro-select" onchange="changeModalCat()"></select>
+    <div id="currentColorPreview" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--card-border);flex-shrink:0;background:#fff"></div>
+    <button onclick="toggleAllColors()" style="border:none;background:var(--bg-soft);border:1px solid var(--card-border);padding:6px 10px;border-radius:8px;font-size:10px;font-weight:700">🎨</button>
+  </div>
+  <div class="pro-segment">
+    <button class="pro-seg-btn active" id="segSub" onclick="switchPane('sub')">✔ مهام <span id="subProgress" style="background:var(--hero);color:#fff;padding:2px 6px;border-radius:99px;font-size:8.5px">0/0</span></button>
+    <button class="pro-seg-btn" id="segNote" onclick="switchPane('note')">📝 نوت</button>
+    <button class="pro-seg-btn" id="segInner" onclick="switchPane('inner')">📑 <span id="innerCount" style="background:var(--card-border);padding:2px 6px;border-radius:99px;font-size:8.5px">0</span></button>
+    <button class="pro-seg-btn" id="segMedia" onclick="switchPane('media')">📸 <span id="mediaCount" style="background:var(--card-border);padding:2px 6px;border-radius:99px;font-size:8.5px">0</span></button>
+  </div>
+  <div id="allColorsBox" style="display:none;margin:0 12px 8px" class="card"><div id="modalColorsTheme" class="excel-grid"></div><div id="modalColorsStandard" class="excel-grid" style="margin-top:8px"></div></div>
+
+  <!-- SUBTASKS - INPUT ON TOP NOW -->
+  <div id="paneSub" class="pane active nu-scroll">
+    <div class="card" style="flex:1;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:6px;position:sticky;top:0;background:var(--card);z-index:2;padding-bottom:8px;border-bottom:1px solid var(--card-border)">
+        <input id="subInput" class="input-pro" placeholder="مهمة فرعية جديدة + Enter" onkeydown="if(event.key==='Enter')addSub()" style="flex:1;background:var(--bg-soft)" />
+        <button onclick="addSub()" style="background:var(--hero);color:#fff;border:none;padding:0 16px;border-radius:10px;font-weight:800;font-size:16px">+</button>
+      </div>
+      <div id="subList" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div style="font-size:8.5px;color:var(--text-soft);text-align:center;margin-top:4px">أول مهمة فوق خالص ↓</div>
+    </div>
+  </div>
+  
+  <div id="paneNote" class="pane nu-scroll">
+    <div class="notes-wrapper">
+      <div class="pro-toolbar-pro nu-scroll" id="noteToolbarPro">
+        <div class="toolbar-group">
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('undo','note')">↩</button>
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('redo','note')">↪</button>
+        </div>
+        <div class="toolbar-group">
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('bold','note')"><b>B</b></button>
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('italic','note')"><i>I</i></button>
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('underline','note')"><u>U</u></button>
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('strikeThrough','note')"><s>S</s></button>
+        </div>
+        <div class="toolbar-group">
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="formatBlock('h1','note')">H1</button>
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="formatBlock('h2','note')">H2</button>
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="formatBlock('blockquote','note')">❝</button>
+        </div>
+        <div class="toolbar-group">
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('insertUnorderedList','note')">•</button>
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('insertOrderedList','note')">1.</button>
+          <button class="tool-btn" onmousedown="event.preventDefault()" onclick="insertChecklist('note')">☑</button>
+        </div>
+        <div class="toolbar-group">
+          <button class="tool-btn color" style="background:#ef4444" onmousedown="event.preventDefault();applyColor('#ef4444','note')"></button>
+          <button class="tool-btn color" style="background:#22c55e" onmousedown="event.preventDefault();applyColor('#22c55e','note')"></button>
+          <button class="tool-btn color" style="background:#3b82f6" onmousedown="event.preventDefault();applyColor('#3b82f6','note')"></button>
+          <button class="tool-btn" style="background:#fef08a" onmousedown="event.preventDefault();applyHighlight('#fef08a','note')">🖍</button>
+        </div>
+      </div>
+      <div id="noteEditor" class="rich-editor-pro" contenteditable="true" placeholder="اكتب ملاحظاتك هنا..."></div>
+      <div class="editor-footer"><span id="editorWordCount">0 كلمة</span><span>💾 حفظ تلقائي</span></div>
+    </div>
+  </div>
+
+  <!-- INNER TABS WITH SAME PRO EDITOR -->
+  <div id="paneInner" class="pane nu-scroll">
+    <div style="display:flex;flex-direction:column;gap:10px;flex:1">
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:11px;font-weight:800;color:var(--text)">التبويبات الداخلية</div>
+        <button onclick="addInnerTab()" style="background:var(--hero);color:#fff;border:none;padding:6px 12px;border-radius:99px;font-size:10px;font-weight:800">+ تبويب</button>
+      </div>
+      <div id="innerTabsBar" class="inner-tab-row nu-scroll"></div>
+      
+      <div id="innerTabEditorBox" style="display:none;flex-direction:column;gap:10px;flex:1">
+        <div class="card" style="display:flex;gap:6px">
+          <input id="innerTabTitleInput" class="input-pro" placeholder="اسم التبويب (بيتحفظ تلقائي)" style="flex:1" />
+          <button onclick="deleteInnerTab(curInnerTabId)" style="background:#FFF1F2;border:1px solid #FECDD3;padding:8px 10px;border-radius:10px;color:#ef4444;font-size:11px">🗑</button>
+        </div>
+        
+        <div class="notes-wrapper" style="min-height:50vh">
+          <div class="pro-toolbar-pro nu-scroll">
+            <div class="toolbar-group">
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('undo','inner')"><b>↩</b></button>
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('redo','inner')"><b>↪</b></button>
+            </div>
+            <div class="toolbar-group">
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('bold','inner')"><b>B</b></button>
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('italic','inner')"><i>I</i></button>
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('underline','inner')"><u>U</u></button>
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('strikeThrough','inner')"><s>S</s></button>
+            </div>
+            <div class="toolbar-group">
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="formatBlock('h1','inner')">H1</button>
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="formatBlock('h2','inner')">H2</button>
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="formatBlock('blockquote','inner')">❝</button>
+            </div>
+            <div class="toolbar-group">
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('insertUnorderedList','inner')">•</button>
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="exec('insertOrderedList','inner')">1.</button>
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="insertChecklist('inner')">☑</button>
+            </div>
+            <div class="toolbar-group">
+              <button class="tool-btn color" style="background:#ef4444" onmousedown="event.preventDefault();applyColor('#ef4444','inner')"></button>
+              <button class="tool-btn color" style="background:#22c55e" onmousedown="event.preventDefault();applyColor('#22c55e','inner')"></button>
+              <button class="tool-btn color" style="background:#3b82f6" onmousedown="event.preventDefault();applyColor('#3b82f6','inner')"></button>
+              <button class="tool-btn" style="background:#fef08a" onmousedown="event.preventDefault();applyHighlight('#fef08a','inner')">🖍</button>
+              <button class="tool-btn" onmousedown="event.preventDefault()" onclick="clearFormat('inner')">✕</button>
+            </div>
+          </div>
+          <div id="innerTabEditor" class="rich-editor-pro" contenteditable="true" placeholder="محتوى التبويب... نفس إمكانيات النوتس بالظبط"></div>
+          <div class="editor-footer"><span>نفس إمكانيات النوتس الاحترافية</span><span>💾 حفظ تلقائي</span></div>
+        </div>
+      </div>
+      <div id="emptyInner" style="text-align:center;padding:30px;color:var(--text-soft);font-size:10px">مفيش تبويبات<br>دوس + تبويب عشان تبدأ</div>
+    </div>
+  </div>
+
+  <div id="paneMedia" class="pane nu-scroll">
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div class="media-actions">
+        <button class="media-btn" onclick="openCamera()"><div class="media-btn-icon" style="background:#dcfce7;color:#16a34a">📸</div><div class="media-btn-label">كاميرا</div></button>
+        <button class="media-btn" onclick="document.getElementById('galleryInput').click()"><div class="media-btn-icon" style="background:#dbeafe;color:#2563eb">🖼️</div><div class="media-btn-label">صور</div></button>
+        <button class="media-btn" onclick="openVoice()"><div class="media-btn-icon" style="background:#fee2e2;color:#dc2626">🎙️</div><div class="media-btn-label">صوت</div></button>
+      </div>
+      <input id="galleryInput" type="file" multiple accept="image/*" style="display:none" onchange="handleGallery(event)">
+      <div id="mediaList" class="media-grid"></div>
+      <div id="emptyMedia" style="text-align:center;padding:16px;color:var(--text-soft);font-size:10px">لسه مفيش وسائط</div>
+    </div>
+  </div>
+
+  <div style="padding:8px 12px;border-top:1px solid var(--card-border);display:flex;gap:8px;background:var(--card);flex-shrink:0">
+    <button onclick="deleteCurrent()" style="background:#FFF1F2;color:#ef4444;border:1px solid #FECDD3;padding:10px;border-radius:10px;flex:1;font-weight:800;font-size:10px">🗑</button>
+    <button onclick="closeModal()" style="background:var(--text);color:#fff;border:none;padding:10px;border-radius:10px;flex:1.5;font-weight:800;font-size:11px">حفظ ✓</button>
+  </div>
+</div>
+
+<script>
+function applyTheme(t){}
+window.syncToABOmar=function(){};
+let defaultCats=[{id:1,emoji:'💊',name:'صيدلية'},{id:2,emoji:'💻',name:'شغل'},{id:3,emoji:'🏠',name:'شخصي'}];
+let cats=[],tasks=[];
+try{cats=JSON.parse(localStorage.getItem('cats_v5')||JSON.stringify(defaultCats));}catch(e){cats=defaultCats;}
+try{tasks=JSON.parse(localStorage.getItem('tasks_v6')||'[]');}catch(e){tasks=[];}
+tasks.forEach(t=>{if(!t.media)t.media=[];if(!t.innerTabs)t.innerTabs=[];if(!t.subtasks)t.subtasks=[];});
+const themeColors=[["#70AD47","#5B9BD5","#FFC000","#A5A5A5","#ED7D31","#4472C4","#2F5597","#D9D9D9","#000000","#FFFFFF"],["#E2EFDA","#D6EAF8","#FFF2CC","#F2F2F2","#FCE4D6","#D9E2F3","#D6DCE4","#EDEDED","#808080","#F2F2F2"],["#C6E0B4","#BDD7EE","#FFE699","#D9D9D9","#F8CBAD","#B4C6E7","#ACB9CA","#BFBFBF","#595959","#D9D9D9"]];
+const standardColors=["#7030A0","#002060","#0070C0","#00B0F0","#00B050","#92D050","#FFFF00","#FFC000","#FF0000","#C00000"];
+let cur=null,selectedHex='#ffffff',activeTaskTab='all',curInnerTabId=null; if(activeTaskTab==='hidden'){ cur.hidden=true; }
+let savedRangeNote=null,savedRangeInner=null;
+function saveRange(editorId){
+  let sel=window.getSelection();if(sel.rangeCount>0){
+    let r=sel.getRangeAt(0);
+    let ed=document.getElementById(editorId==='inner'?'innerTabEditor':'noteEditor');
+    if(ed&&ed.contains(r.commonAncestorContainer)){
+      if(editorId==='note')savedRangeNote=r.cloneRange();else savedRangeInner=r.cloneRange();
+    }
+  }
+}
+function restoreRange(editorId){
+  let r=editorId==='note'?savedRangeNote:savedRangeInner;
+  let id=editorId==='inner'?'innerTabEditor':'noteEditor';
+  let ed=document.getElementById(id);
+  if(r&&ed){let sel=window.getSelection();sel.removeAllRanges();try{sel.addRange(r);ed.focus();}catch(e){}}else if(ed)ed.focus();
+}
+document.addEventListener('selectionchange',()=>{
+  let ae=document.activeElement;
+  if(ae&&ae.id==='noteEditor')saveRange('note');
+  if(ae&&ae.id==='innerTabEditor')saveRange('inner');
+});
+
+function exec(cmd,editor){restoreRange(editor);document.execCommand(cmd,false,null);saveRange(editor);if(editor==='note')autoSaveNote();else autoSaveInnerContent();}
+function formatBlock(tag,editor){restoreRange(editor);document.execCommand('formatBlock',false,tag);saveRange(editor);if(editor==='note')autoSaveNote();else autoSaveInnerContent();}
+function applyColor(c,editor){restoreRange(editor);document.execCommand('foreColor',false,c);saveRange(editor);if(editor==='note')autoSaveNote();else autoSaveInnerContent();}
+function applyHighlight(c,editor){restoreRange(editor);document.execCommand('hiliteColor',false,c);saveRange(editor);if(editor==='note')autoSaveNote();else autoSaveInnerContent();}
+function clearFormat(editor){restoreRange(editor);document.execCommand('removeFormat',false,null);document.execCommand('formatBlock',false,'p');saveRange(editor);if(editor==='note')autoSaveNote();else autoSaveInnerContent();}
+function insertChecklist(editor){restoreRange(editor);let html=`<div class="checklist"><input type="checkbox"><span contenteditable="true">مهمة جديدة</span></div>`;document.execCommand('insertHTML',false,html);saveRange(editor);if(editor==='note')autoSaveNote();else autoSaveInnerContent();}
+function updateWordCount(){let text=document.getElementById('noteEditor').innerText||'';let words=text.trim()?text.trim().split(/\s+/).length:0;let el=document.getElementById('editorWordCount');if(el)el.innerText=words+' كلمة';}
+
+function saveLS(){try{localStorage.setItem('tasks_v6',JSON.stringify(tasks));localStorage.setItem('cats_v5',JSON.stringify(cats));if(window.syncToABOmar)syncToABOmar();}catch(e){}render();}
+
+(function(){
+  let inp=document.getElementById('mainInput');
+  if(inp){
+    inp.addEventListener('input', (e)=>{
+      let v=e.target.value.trim();
+      let code=localStorage.getItem('omar_hidden_code_v1') || '27943';
+      if(v===code || v.startsWith(code+' ')){
+        showHiddenTab=true;
+        let chip=document.getElementById('tt_hidden');
+        if(chip) chip.style.display='inline-block';
+      }
+    });
+  }
+})();
+
+function render(){
+  let board=document.getElementById('board');
+  let filtered=tasks;
+  if(activeTaskTab==='hidden'){
+    filtered=tasks.filter(t=>t.hidden);
+  }else if(activeTaskTab==='done'){
+    filtered=tasks.filter(t=>t.done && !t.hidden);
+  }else if(activeTaskTab!=='all'){
+    filtered=tasks.filter(t=>t.cat===activeTaskTab && !t.hidden);
+  }else{
+    filtered=tasks.filter(t=>!t.hidden);
+  }
+  let code=localStorage.getItem('omar_hidden_code_v1') || '27943';
+  let hiddenSettingsHtml='';
+  if(activeTaskTab==='hidden'){
+    hiddenSettingsHtml=`<div style="background:var(--card);border:1.5px solid var(--hero);border-radius:12px;padding:10px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="font-size:10px">🔒 وضع المخفي - أي مهمة تضيفها هنا هتكون مخفية</b><button onclick="exitHidden()" style="background:var(--bg-soft);border:1px solid var(--card-border);border-radius:6px;padding:3px 8px;font-size:8px;font-weight:800">✕ إغلاق المخفي</button></div>
+      <div style="background:var(--bg-soft);border-radius:8px;padding:8px">
+        <div style="font-size:8px;font-weight:800;color:var(--text);margin-bottom:4px">تغيير الكود السري (مخفي عن العامة)</div>
+        <div style="display:flex;gap:6px"><input id="hiddenCodeInput" type="password" placeholder="الكود الحالي مخفي" style="flex:1;background:var(--card);border:1px solid var(--card-border);border-radius:6px;padding:6px;font-size:10px"><button onclick="toggleCodeVisibility()" style="background:var(--card);border:1px solid var(--card-border);border-radius:6px;padding:6px 8px;font-size:10px">👁️</button><button onclick="saveHiddenCode()" style="background:var(--hero);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:9px;font-weight:800">حفظ</button></div>
+        <div style="font-size:7px;color:var(--text-soft);margin-top:4px">الكود الحالي: <span id="currentHiddenCodeDisplay">••••</span> <button onclick="showCurrentCode()" style="background:transparent;border:none;font-size:7px;color:var(--hero);text-decoration:underline;cursor:pointer">إظهار 5 ثواني</button></div>
+      </div>
+    </div>`;
+  }
+  if(filtered.length===0){
+    let msg = activeTaskTab==='hidden' ? '🔒 لا يوجد مهام مخفية<br><small style="font-size:8px">اكتب أي اسم فوق أو من + وهيتضاف مخفي تلقائياً لأنك جوه المخفي</small>' : '📭 لا يوجد مهام';
+    board.innerHTML=hiddenSettingsHtml+'<div style="text-align:center;padding:30px;color:var(--text-soft)">'+msg+'</div>';
+    return;
+  }
+  let cardsHtml=filtered.map(t=>{
+    let total=(t.subtasks||[]).length;
+    let done=(t.subtasks||[]).filter(s=>s.done).length;
+    let pct= total>0 ? Math.round((done/total)*100) : 0;
+    let progressDiv = (total>0 && pct>0) ? `<div class="task-progress-full" style="width:${pct}%;background:color-mix(in srgb, var(--hero) 18%, var(--card));border-right:3px solid var(--hero)"></div>` : '';
+    let pctBadge = total>0 ? `<span style="font-size:7px;font-weight:900;background:var(--hero);color:#fff;padding:1px 5px;border-radius:99px;margin-right:4px">${pct}%</span>` : '';
+    return `<div class="task-outer"><div class="task-card ${t.done?'done':''}" style="border-right:4px solid ${t.color||'#bbf7d0'}" onclick="openTask(${t.id})">${progressDiv}<div class="task-card-content" style="display:flex;gap:8px;align-items:center;flex:1"><input type="checkbox" ${t.done?'checked':''} onclick="event.stopPropagation();toggleDoneQuick(${t.id})" style="width:18px;height:18px"><div style="flex:1"><div style="font-size:11px;font-weight:800">${t.hidden?'🔒 ':''}${t.text||'بدون عنوان'} ${pctBadge}</div><div style="font-size:8px;color:var(--text-soft);margin-top:2px">${t.cat||''} ${total? '• '+done+'/'+total:''} ${t.media?.length? '• 📸'+t.media.length:''}</div></div></div></div><button class="ext-del" onclick="quickDelete(${t.id})" style="position:relative;z-index:2">🗑</button></div>`;
+  }).join('');
+  board.innerHTML=hiddenSettingsHtml+cardsHtml;
+  let chipBox=document.getElementById('dynamicCatsChips');
+  if(chipBox) chipBox.innerHTML=cats.map(c=>`<button onclick="filterTasksTab('${c.name}')" id="tt_${c.name}" class="filter-chip ${activeTaskTab===c.name?'active':''}">${c.emoji} ${c.name}</button>`).join('');
+  let hiddenChip=document.getElementById('tt_hidden');
+  if(hiddenChip) hiddenChip.style.display = showHiddenTab ? 'inline-block' : 'none';
+}
+function exitHidden(){
+  filterTasksTab('all');
+  // إخفاء التبويب مرة أخرى بعد الخروج - زي ما طلبت
+  showHiddenTab=false;
+  let chip=document.getElementById('tt_hidden');
+  if(chip) chip.style.display='none';
+  // امسح الكود من خانة البحث لو موجود
+  let inp=document.getElementById('mainInput');
+  if(inp){
+    let code=localStorage.getItem('omar_hidden_code_v1') || '27943';
+    if(inp.value.trim()===code) inp.value='';
+  }
+}
+
+function quickDelete(id){let t=tasks.find(x=>x.id===id);if(!t)return;cur=t;document.getElementById('delTaskPreview').innerText=t.text;document.getElementById('delConfirmCheck').checked=false;document.getElementById('finalDelBtn').disabled=true;document.getElementById('deleteWarningModal').classList.add('show');}
+function toggleDelBtn(){let chk=document.getElementById('delConfirmCheck').checked;let btn=document.getElementById('finalDelBtn');btn.disabled=!chk;btn.style.background=chk?'#ef4444':'#E5E7EB';btn.style.color=chk?'#fff':'#9CA3AF';}
+function closeDeleteWarning(){document.getElementById('deleteWarningModal').classList.remove('show');}
+function confirmDelete(){if(!cur)return;let delId=cur.id;cur=null;document.getElementById('modal').style.display='none';closeDeleteWarning();tasks=tasks.filter(x=>x.id!==delId);saveLS();}
+let showHiddenTab=false;
+function filterTasksTab(tab){
+  activeTaskTab=tab;
+  document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active'));
+  let el=document.getElementById('tt_'+tab);
+  if(el) el.classList.add('active');
+  // لو خرجت من المخفي لتبويب تاني، اخفيه تلقائياً
+  if(tab!=='hidden' && showHiddenTab){
+    // لا تخفي فوراً، استنى شوية عشان لو راجع، لكن حسب طلبك هنخفيه لما تخرج
+    // showHiddenTab يفضل true لحد ما تدوس خروج، لكن هنسيبه يختفي لما تدوس أي تبويب تاني
+    // هنخفيه فعلاً
+    showHiddenTab=false;
+    let chip=document.getElementById('tt_hidden');
+    if(chip) chip.style.display='none';
+  }
+  render();
+}
+function addQuick(){let text=document.getElementById('mainInput').value.trim();if(!text){openNewTaskModal();return;}doAdd();}
+function doAdd(){
+  let inp=document.getElementById('mainInput');
+  let raw=inp.value.trim();
+  if(!raw){ openNewTaskModal(); return; }
+  let code=localStorage.getItem('omar_hidden_code_v1') || '27943';
+  if(raw===code){
+    showHiddenTab=true;
+    let chip=document.getElementById('tt_hidden');
+    if(chip) chip.style.display='inline-block';
+    filterTasksTab('hidden');
+    inp.value='';
+    return;
+  }
+  let isHidden=false;
+  let text=raw;
+  // لو انت جوه المخفي، أي حاجة تكتبها تتضاف مخفية تلقائياً
+  if(activeTaskTab==='hidden'){
+    isHidden=true;
+    // لو كتبت الكود + مسافة، شيل الكود
+    if(raw.startsWith(code+' ') || raw.startsWith(code+'-')){
+      text=raw.substring(code.length+1).trim() || 'مهمة مخفية';
+    }
+  }else{
+    if(raw.startsWith(code+' ') || raw.startsWith(code+'-')){
+      isHidden=true;
+      text=raw.substring(code.length+1).trim() || 'مهمة مخفية';
+    }
+  }
+  let catSel=document.getElementById('cat').value;
+  tasks.unshift({id:Date.now(),text:text,cat:catSel,color:selectedHex||'#ffffff',done:false,note:'',subtasks:[],innerTabs:[],media:[],hidden:isHidden});
+  inp.value='';
+  saveLS();
+  if(isHidden){
+    showHiddenTab=true;
+    let chip=document.getElementById('tt_hidden');
+    if(chip) chip.style.display='inline-block';
+    filterTasksTab('hidden');
+  }
+}
+function ensureInTasks(){if(!cur)return;let ex=tasks.find(x=>x.id===cur.id);if(!ex)tasks.unshift(cur);}
+function switchPane(p){document.querySelectorAll('.pro-seg-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.pane').forEach(el=>el.classList.remove('active'));document.getElementById('pane'+p.charAt(0).toUpperCase()+p.slice(1)).classList.add('active');document.getElementById('seg'+p.charAt(0).toUpperCase()+p.slice(1)).classList.add('active');}
+function openNewTaskModal(){cur={id:Date.now(),text:'',cat:cats[0]?.name||'شخصي',color:'#ffffff',done:false,note:'',subtasks:[],innerTabs:[],media:[]};document.getElementById('modalTitle').value='';document.getElementById('noteEditor').innerHTML='';document.getElementById('modalCover').style.setProperty('--hero-color',cur.color);document.getElementById('currentColorPreview').style.background=cur.color;document.getElementById('modalCat').innerHTML=cats.map(c=>`<option value="${c.name}" ${c.name===cur.cat?'selected':''}>${c.emoji} ${c.name}</option>`).join('');renderSubtasks();renderInnerTabs();renderMedia();switchPane('sub');document.getElementById('modal').style.display='flex';}
+function openTask(id){let t=tasks.find(x=>x.id===id);if(!t)return;if(!t.media)t.media=[];cur=t;document.getElementById('modalTitle').value=t.text||'';document.getElementById('modalCover').style.setProperty('--hero-color',t.color||'#16a34a');document.getElementById('currentColorPreview').style.background=t.color||'#fff';document.getElementById('noteEditor').innerHTML=t.note||'';document.getElementById('modalCat').innerHTML=cats.map(c=>`<option value="${c.name}" ${c.name===t.cat?'selected':''}>${c.emoji} ${c.name}</option>`).join('');renderSubtasks();renderInnerTabs();renderMedia();updateWordCount();switchPane('sub');document.getElementById('modal').style.display='flex';}
+function closeModal(){if(cur){cur.text=document.getElementById('modalTitle').value.trim()||cur.text;ensureInTasks();saveLS();}document.getElementById('modal').style.display='none';cur=null;curInnerTabId=null; if(activeTaskTab==='hidden'){ cur.hidden=true; }stopCamera();stopVoice();}
+function changeModalCat(){if(cur){cur.cat=document.getElementById('modalCat').value;ensureInTasks();saveLS();}}
+function toggleDoneQuick(id){let t=tasks.find(x=>x.id===id);if(t){t.done=!t.done;saveLS();}}
+function deleteCurrent(){if(!cur)return;quickDelete(cur.id);}
+function addSub(){let inp=document.getElementById('subInput');let txt=inp.value.trim();if(!txt||!cur)return;if(!cur.subtasks)cur.subtasks=[];cur.subtasks.unshift({id:Date.now(),text:txt,done:false});inp.value='';renderSubtasks();ensureInTasks();saveLS();}
+function renderSubtasks(){if(!cur)return;let subs=cur.subtasks||[];document.getElementById('subProgress').innerText=subs.filter(s=>s.done).length+'/'+subs.length;document.getElementById('subList').innerHTML=subs.map(s=>`<div style="display:flex;gap:6px;align-items:center;background:var(--bg-soft);padding:8px 10px;border-radius:10px;border:1px solid var(--card-border)"><input type="checkbox" ${s.done?'checked':''} onchange="toggleSub(${s.id})" style="width:16px;height:16px"><span style="flex:1;font-size:10.5px;font-weight:600;${s.done?'text-decoration:line-through;opacity:.6':''}">${s.text}</span><button onclick="delSub(${s.id})" style="border:none;background:transparent;color:#ef4444">✕</button></div>`).join('');}
+function toggleSub(id){if(!cur||!cur.subtasks)return;let s=cur.subtasks.find(x=>x.id===id);if(s){s.done=!s.done;renderSubtasks();saveLS();}}
+function delSub(id){if(!cur||!cur.subtasks)return;cur.subtasks=cur.subtasks.filter(x=>x.id!==id);renderSubtasks();saveLS();}
+function autoSaveNote(){if(!cur)return;cur.note=document.getElementById('noteEditor').innerHTML;ensureInTasks();saveLS();updateWordCount();}
+function autoSaveInnerTitle(){if(!cur||!curInnerTabId)return;let t=cur.innerTabs.find(x=>x.id===curInnerTabId);if(!t)return;let nt=document.getElementById('innerTabTitleInput').value.trim();if(nt){t.title=nt;renderInnerTabs();ensureInTasks();saveLS();}}
+function autoSaveInnerContent(){if(!cur||!curInnerTabId)return;let t=cur.innerTabs.find(x=>x.id===curInnerTabId);if(!t)return;t.content=document.getElementById('innerTabEditor').innerHTML;ensureInTasks();saveLS();}
+document.addEventListener('input',(e)=>{if(e.target.id==='modalTitle'){if(cur){cur.text=e.target.value;ensureInTasks();}} if(e.target.id==='noteEditor'){autoSaveNote();} if(e.target.id==='innerTabEditor'){autoSaveInnerContent();} if(e.target.id==='innerTabTitleInput'){autoSaveInnerTitle();}});
+function addInnerTab(){if(!cur)return;if(!cur.innerTabs)cur.innerTabs=[];let nt={id:Date.now(),title:'تبويب '+(cur.innerTabs.length+1),content:''};cur.innerTabs.push(nt);ensureInTasks();saveLS();renderInnerTabs();openInnerTab(nt.id);}
+function renderInnerTabs(){if(!cur)return;let tabs=cur.innerTabs||[];document.getElementById('innerCount').innerText=tabs.length;let bar=document.getElementById('innerTabsBar');let empty=document.getElementById('emptyInner');if(tabs.length===0){bar.innerHTML='';document.getElementById('innerTabEditorBox').style.display='none';empty.style.display='block';return;}empty.style.display='none';bar.innerHTML=tabs.map(t=>`<button onclick="openInnerTab(${t.id})" class="inner-tab-pill ${curInnerTabId===t.id?'active':''}">${t.title||'بدون اسم'}</button>`).join('');}
+function openInnerTab(id){curInnerTabId=id;let t=cur.innerTabs.find(x=>x.id===id);if(!t)return;document.getElementById('innerTabEditorBox').style.display='flex';document.getElementById('innerTabTitleInput').value=t.title||'';document.getElementById('innerTabEditor').innerHTML=t.content||'';renderInnerTabs();switchPane('inner');}
+function deleteInnerTab(id){if(!cur)return;if(!confirm('مسح التبويب؟'))return;cur.innerTabs=cur.innerTabs.filter(x=>x.id!==id);if(curInnerTabId===id){curInnerTabId=null; if(activeTaskTab==='hidden'){ cur.hidden=true; }document.getElementById('innerTabEditorBox').style.display='none';}renderInnerTabs();saveLS();}
+
+let cameraStream=null;
+async function openCamera(){document.getElementById('cameraModal').classList.add('show');try{cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});document.getElementById('cameraVideo').srcObject=cameraStream;}catch(e){alert('مش قادر أفتح الكاميرا: '+e.message);closeCamera();}}
+function stopCamera(){if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}document.getElementById('cameraVideo').srcObject=null;}
+function closeCamera(){document.getElementById('cameraModal').classList.remove('show');stopCamera();}
+function capturePhoto(){let video=document.getElementById('cameraVideo');let canvas=document.getElementById('cameraCanvas');canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d').drawImage(video,0,0);let dataUrl=canvas.toDataURL('image/jpeg',0.8);if(!cur.media)cur.media=[];cur.media.push({id:Date.now(),name:'كاميرا '+new Date().toLocaleTimeString(),type:'image/jpeg',data:dataUrl,isImage:true,isVideo:false,isAudio:false,isLink:false});renderMedia();ensureInTasks();saveLS();closeCamera();switchPane('media');}
+function handleGallery(e){let files=e.target.files;if(!files||!cur)return;if(!cur.media)cur.media=[];Array.from(files).forEach(file=>{let reader=new FileReader();reader.onload=ev=>{cur.media.push({id:Date.now()+Math.random(),name:file.name,type:file.type,data:ev.target.result,isImage:true,isVideo:false,isAudio:false,isLink:false});renderMedia();ensureInTasks();saveLS();};reader.readAsDataURL(file);});e.target.value='';switchPane('media');}
+let mediaRecorder=null,audioChunks=[],voiceStartTime=null,voiceTimerInterval=null,isRecording=false;
+async function openVoice(){document.getElementById('voiceModal').classList.add('show');document.getElementById('voiceTimer').innerText='00:00';document.getElementById('voiceWave').style.opacity='.3';}
+function closeVoice(){document.getElementById('voiceModal').classList.remove('show');stopVoice();}
+function stopVoice(){if(mediaRecorder&&isRecording){mediaRecorder.stop();}isRecording=false;clearInterval(voiceTimerInterval);mediaRecorder=null;let btn=document.getElementById('voiceActionBtn');if(btn){btn.innerText='● بدء التسجيل';btn.style.background='#ef4444';}document.getElementById('voiceWave').style.opacity='.3';}
+async function toggleVoiceRecord(){let btn=document.getElementById('voiceActionBtn');if(!isRecording){try{let stream=await navigator.mediaDevices.getUserMedia({audio:true});mediaRecorder=new MediaRecorder(stream);audioChunks=[];mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data);};mediaRecorder.onstop=()=>{let blob=new Blob(audioChunks,{type:'audio/webm'});let reader=new FileReader();reader.onload=ev=>{if(!cur.media)cur.media=[];cur.media.push({id:Date.now(),name:'تسجيل '+new Date().toLocaleTimeString(),type:'audio/webm',data:ev.target.result,isImage:false,isVideo:false,isAudio:true,isLink:false});renderMedia();ensureInTasks();saveLS();switchPane('media');};reader.readAsDataURL(blob);stream.getTracks().forEach(t=>t.stop());};mediaRecorder.start();isRecording=true;voiceStartTime=Date.now();btn.innerText='■ إيقاف وحفظ';btn.style.background='#14532d';document.getElementById('voiceWave').style.opacity='1';voiceTimerInterval=setInterval(()=>{let diff=Math.floor((Date.now()-voiceStartTime)/1000);let m=String(Math.floor(diff/60)).padStart(2,'0');let s=String(diff%60).padStart(2,'0');document.getElementById('voiceTimer').innerText=m+':'+s;},500);}catch(e){alert('الميكروفون مش متاح: '+e.message);}}else{mediaRecorder.stop();closeVoice();}}
+function renderMedia(){if(!cur)return;let list=cur.media||[];document.getElementById('mediaCount').innerText=list.length;let container=document.getElementById('mediaList');let empty=document.getElementById('emptyMedia');if(list.length===0){container.innerHTML='';empty.style.display='block';return;}empty.style.display='none';container.innerHTML=list.map(m=>{if(m.isImage){return `<div class="media-item"><img src="${m.data}"><button class="media-del" onclick="delMedia(${m.id})">✕</button></div>`;}else if(m.isAudio){return `<div class="audio-item"><div style="width:36px;height:36px;background:#fee2e2;color:#dc2626;border-radius:8px;display:flex;align-items:center;justify-content:center">🎙️</div><audio controls src="${m.data}" style="flex:1;height:32px"></audio><button onclick="delMedia(${m.id})" style="border:none;background:#FFF1F2;color:#ef4444;width:28px;height:28px;border-radius:8px">✕</button></div>`;}else{return `<div class="media-item"><div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-soft)">📄 ${m.name}</div><button class="media-del" onclick="delMedia(${m.id})">✕</button></div>`;}}).join('');}
+function delMedia(id){if(!cur||!cur.media)return;cur.media=cur.media.filter(x=>x.id!==id);renderMedia();saveLS();}
+function toggleAllColors(){let box=document.getElementById('allColorsBox');box.style.display=box.style.display==='none'?'block':'none'; if(box.style.display==='block'){renderColorPalette();}}
+function renderColorPalette(){let themeBox=document.getElementById('modalColorsTheme');let stdBox=document.getElementById('modalColorsStandard');if(!themeBox)return;themeBox.innerHTML='';stdBox.innerHTML='';themeColors.flat().forEach(hex=>{let d=document.createElement('div');d.className='color-cell';d.style.background=hex;d.onclick=()=>{if(cur){cur.color=hex;document.getElementById('currentColorPreview').style.background=hex;document.getElementById('modalCover').style.setProperty('--hero-color',hex);ensureInTasks();saveLS();}};themeBox.appendChild(d);});standardColors.forEach(hex=>{let d=document.createElement('div');d.className='color-cell';d.style.background=hex;d.onclick=()=>{if(cur){cur.color=hex;document.getElementById('currentColorPreview').style.background=hex;document.getElementById('modalCover').style.setProperty('--hero-color',hex);ensureInTasks();saveLS();}};stdBox.appendChild(d);});}
+
+
+function showToast(title, sub='', type='success'){
+  let cont=document.getElementById('toastContainer');
+  if(!cont){
+    cont=document.createElement('div');
+    cont.id='toastContainer';
+    document.body.appendChild(cont);
+  }
+  let t=document.createElement('div');
+  t.className='toast-pro '+type;
+  t.innerHTML=`<div class="toast-pro-icon">${type==='success'?'✅':'⚠️'}</div><div class="toast-pro-text"><div class="toast-pro-title">${title}</div>${sub?`<div class="toast-pro-sub">${sub}</div>`:''}</div><button onclick="this.parentElement.remove()" style="background:transparent;border:none;font-size:12px;cursor:pointer;color:var(--text-soft)">✕</button>`;
+  cont.appendChild(t);
+  setTimeout(()=>{
+    t.style.animation='toastOut .3s ease forwards';
+    setTimeout(()=>{ t.remove(); }, 300);
+  }, 3000);
+}
+// Override alert to use toast for professional look
+window._oldAlert = window.alert;
+window.alert = function(msg){
+  // Parse if it's code save message
+  if(typeof msg==='string' && msg.includes('تم حفظ')){
+    showToast(msg, '', 'success');
+  }else if(typeof msg==='string' && msg.toLowerCase().includes('قصير')){
+    showToast('الكود قصير جداً', 'اكتب 3 أحرف على الأقل', 'error');
+  }else{
+    showToast(msg, '', 'success');
+  }
+};
+
+function saveHiddenCode(){
+  let inp=document.getElementById('hiddenCodeInput');
+  if(!inp) return;
+  let v=inp.value.trim();
+  if(!v) return;
+  if(v.length<3){ showToast('الكود قصير جداً','اكتب 3 أحرف على الأقل','error'); return; }
+  localStorage.setItem('omar_hidden_code_v1', v);
+  showToast('تم حفظ الكود الجديد','الكود: '+v+' - استخدم: '+v+' + مسافة + اسم المهمة','success');
+  inp.value='';
+  render();
+}
+function toggleCodeVisibility(){
+  let inp=document.getElementById('hiddenCodeInput');
+  if(!inp) return;
+  inp.type = inp.type==='password' ? 'text' : 'password';
+}
+function showCurrentCode(){
+  let code=localStorage.getItem('omar_hidden_code_v1') || '27943';
+  let el=document.getElementById('currentHiddenCodeDisplay');
+  if(el){
+    if(el.innerText==='••••'){
+      el.innerText=code;
+      setTimeout(()=>{ el.innerText='••••'; }, 5000);
+    }else{
+      el.innerText='••••';
+    }
+  }
+}
+
+function openManager(){document.getElementById('managerModal').style.display='flex';}
+function closeManager(){document.getElementById('managerModal').style.display='none';}
+function mTab(t){document.getElementById('mCats').style.display=t==='cats'?'block':'none';document.getElementById('mColors').style.display=t==='colors'?'block':'none';}
+function addCategory(){let n=document.getElementById('newCatName').value.trim(),e=document.getElementById('newCatEmoji').value.trim()||'📌';if(!n)return;cats.push({id:Date.now(),emoji:e,name:n});document.getElementById('newCatName').value='';renderManagerLists();render();saveLS();}
+function delCat(id){cats=cats.filter(c=>c.id!==id);renderManagerLists();render();saveLS();}
+function renderManagerLists(){let catSel=document.getElementById('cat');if(catSel)catSel.innerHTML=cats.map(c=>`<option value="${c.name}">${c.emoji} ${c.name}</option>`).join('');let catList=document.getElementById('catList');if(catList)catList.innerHTML=cats.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg-soft);padding:7px 9px;border-radius:8px;margin-bottom:5px;border:1px solid var(--card-border)"><div style="color:var(--text);font-size:10.3px">${c.emoji} <b>${c.name}</b></div><button onclick="delCat(${c.id})" style="border:none;background:#FEE2E2;width:25px;height:25px;border-radius:6px;color:#ef4444">✕</button></div>`).join('');}
+renderManagerLists();render();
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>

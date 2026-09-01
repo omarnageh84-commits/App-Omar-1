@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16A34A">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="themes.js?v=15"></script>
+<style>
+:root{ --bg:#F0FDF4; --bg-soft:#DCFCE7; --card:#FFFFFF; --card-border:#BBF7D0; --text:#14532D; --text-soft:#4ADE80; --primary:#16A34A; --hero:#16A34A; --accent:#22C55E; --nav-bg: rgba(255,255,255,0.92); }
+*{box-sizing:border-box;margin:0;padding:0;font-family:'IBM Plex Sans Arabic',sans-serif}
+html,body{height:100%;background:#e5e7eb;overflow:hidden}
+body{display:flex;justify-content:center;align-items:flex-start;background:#0f172a0d;}
+.phone-shell{
+  width:100%; max-width:430px; height:100dvh; background:var(--bg);
+  position:relative; overflow:hidden; box-shadow:0 0 0 1px var(--card-border), 0 25px 80px -20px rgba(0,0,0,.4);
+  display:flex; flex-direction:column;
+}
+@media(min-width:500px){
+  .phone-shell{ margin-top:12px; height:calc(100dvh - 24px); border-radius:28px; border:8px solid #111; }
+}
+.pageWrap{flex:1;position:relative;background:var(--bg);overflow:hidden}
+.page{position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;pointer-events:none;transition:opacity .22s;background:var(--bg)}
+.page.active{opacity:1;pointer-events:auto;z-index:2}
+.nav{
+  height:72px; margin:10px; background:var(--nav-bg); backdrop-filter:blur(24px) saturate(200%);
+  border:1.5px solid var(--card-border); border-radius:20px; display:flex;align-items:center;padding:6px;gap:5px;z-index:10;
+  box-shadow: 0 10px 30px -12px rgba(0,0,0,.15);
+}
+.nav button{flex:1;height:100%;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text-soft);font-size:9px;font-weight:700;cursor:pointer;transition:.2s}
+.nav button.active{background:var(--hero);color:#fff;box-shadow:0 8px 18px color-mix(in srgb, var(--hero) 30%, transparent)}
+.nav button .icon{font-size:18px}
+</style>
+</head>
+<body>
+<div class="phone-shell">
+  <div class="pageWrap">
+    <iframe data-page="home.html" src="home.html?v=15" class="page active" title="home"></iframe>
+    <iframe data-page="daily.html" src="about:blank" class="page" title="daily"></iframe>
+    <iframe data-page="attendance.html" src="about:blank" class="page" title="attendance"></iframe>
+    <iframe data-page="tasks.html" src="about:blank" class="page" title="tasks"></iframe>
+  </div>
+  <nav class="nav">
+    <button class="active" onclick="switchPage('home.html',this)"><span class="icon">🏠</span><span>الرئيسية</span></button>
+    <button onclick="switchPage('daily.html',this)"><span class="icon">📊</span><span>اليومية</span></button>
+    <button onclick="switchPage('attendance.html',this)"><span class="icon">⏱️</span><span>الحضور</span></button>
+    <button onclick="switchPage('tasks.html',this)"><span class="icon">✓</span><span>المهام</span></button>
+  </nav>
+</div>
+<script src="drive-sync.js"></script>
+<script>
+const frames=document.querySelectorAll('.page');
+function switchPage(name,btn){
+  frames.forEach(f=>{
+    const is=f.dataset.page===name;
+    f.classList.toggle('active',is);
+    if(is && f.src.includes('about:blank')){
+      f.src=name+'?v=15';
+      f.onload=()=>{
+        let cur=localStorage.getItem('omar_theme')||'green';
+        if(window.themes && themes[cur] && f.contentDocument){
+          Object.entries(themes[cur]).forEach(([k,v])=>f.contentDocument.documentElement.style.setProperty(k,v));
+        }
+      };
+    }
+  });
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(navigator.vibrate) navigator.vibrate(10);
+}
+applyTheme(localStorage.getItem('omar_theme')||'green');
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(()=>console.log('✅ PWA Ready - يمكنك تثبيته من كروم'));} window.switchPage=switchPage;
+</script>
+</body>
+</html>
