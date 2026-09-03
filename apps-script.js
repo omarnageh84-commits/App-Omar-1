@@ -1,37 +1,68 @@
-// AB Omar - Drive File Backup - JSON - نهائي
-function doPost(e){
-  try{
-    let dataStr = e.postData.contents;
-    let fileName = 'AB_Omar_Backup.json';
-    let files = DriveApp.getFilesByName(fileName);
-    if(files.hasNext()){
-      files.next().setContent(dataStr);
-    }else{
-      DriveApp.createFile(fileName, dataStr, MimeType.PLAIN_TEXT);
+// AB Omar - JSON Drive Backup - يحفظ ملف omar-backup.json على Drive مباشرة
+function doPost(e) {
+  try {
+    var payload = e.postData ? e.postData.contents : "";
+    if (!payload) {
+      return jsonResponse({error: "no data"});
     }
-    let smallFiles = DriveApp.getFilesByName('omar-backup.json');
-    if(smallFiles.hasNext()){
-      smallFiles.next().setContent(dataStr);
-    }else{
-      DriveApp.createFile('omar-backup.json', dataStr, MimeType.PLAIN_TEXT);
+    var data = JSON.parse(payload);
+    data.last_sync = new Date().toISOString();
+    
+    var fileName = "omar-backup.json";
+    var content = JSON.stringify(data, null, 2);
+    
+    var files = DriveApp.getFilesByName(fileName);
+    if (files.hasNext()) {
+      var file = files.next();
+      file.setContent(content);
+      Logger.log("Updated: " + fileName);
+    } else {
+      var newFile = DriveApp.createFile(fileName, content, MimeType.PLAIN_TEXT);
+      Logger.log("Created: " + fileName + " ID: " + newFile.getId());
     }
-    return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
-  }catch(err){
-    return ContentService.createTextOutput(JSON.stringify({error: err.message})).setMimeType(ContentService.MimeType.JSON);
+    
+    return jsonResponse({success: true, file: fileName, time: data.last_sync});
+    
+  } catch(err) {
+    Logger.log("Error doPost: " + err.message);
+    return jsonResponse({error: err.message});
   }
 }
-function doGet(){
-  try{
-    let names = ['AB_Omar_Backup.json', 'omar-backup.json'];
-    for(let i=0; i<names.length; i++){
-      let files = DriveApp.getFilesByName(names[i]);
-      if(files.hasNext()){
-        let content = files.next().getBlob().getDataAsString();
-        if(content) return ContentService.createTextOutput(content).setMimeType(ContentService.MimeType.JSON);
-      }
+
+function doGet(e) {
+  try {
+    var fileName = "omar-backup.json";
+    var files = DriveApp.getFilesByName(fileName);
+    if (!files.hasNext()) {
+      return jsonResponse({error: "no backup found - لم يتم العثور على ملف النسخ"});
     }
-    return ContentService.createTextOutput(JSON.stringify({error: 'No backup found'})).setMimeType(ContentService.MimeType.JSON);
-  }catch(err){
-    return ContentService.createTextOutput(JSON.stringify({error: err.message})).setMimeType(ContentService.MimeType.JSON);
+    var file = files.next();
+    var content = file.getBlob().getDataAsString();
+    // لو الملف فاضي
+    if (!content) return jsonResponse({error: "empty file"});
+    
+    return ContentService.createTextOutput(content)
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch(err) {
+    Logger.log("Error doGet: " + err.message);
+    return jsonResponse({error: err.message});
   }
+}
+
+function jsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// دالة للتجربة من داخل Apps Script نفسه
+function testBackup() {
+  var dummy = {daily: [{item:"test"}], tasks: [], backup_date: new Date().toISOString()};
+  var files = DriveApp.getFilesByName("omar-backup.json");
+  if (files.hasNext()) {
+    files.next().setContent(JSON.stringify(dummy, null, 2));
+  } else {
+    DriveApp.createFile("omar-backup.json", JSON.stringify(dummy, null, 2), MimeType.PLAIN_TEXT);
+  }
+  Logger.log("test done");
 }
