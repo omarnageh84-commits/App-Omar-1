@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#16A34A">
+<meta name="theme-color" content="#0F766E">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
-<script src="themes.js?v=15"></script>
+<script src="themes.js"></script>
 <style>
-:root{ --bg:#F0FDF4; --bg-soft:#DCFCE7; --card:#FFFFFF; --card-border:#BBF7D0; --text:#14532D; --text-soft:#4ADE80; --primary:#16A34A; --hero:#16A34A; --accent:#22C55E; --nav-bg: rgba(255,255,255,0.92); }
+:root{ --bg:#F0FDFA; --bg-soft:#CCFBF1; --card:#FFFFFF; --card-border:#5EEAD4; --text:#134E4A; --text-soft:#0D9488; --primary:#0F766E; --hero:#0F766E; --accent:#14B8A6; --nav-bg: rgba(255,255,255,0.92); }
 *{box-sizing:border-box;margin:0;padding:0;font-family:'IBM Plex Sans Arabic',sans-serif}
-html,body{height:100%;background:#e5e7eb;overflow:hidden}
-body{display:flex;justify-content:center;align-items:flex-start;background:#0f172a0d;}
+html,body{height:100%;background:var(--bg);overflow:hidden}
+body{display:flex;justify-content:center;align-items:flex-start;background:var(--bg);}
 .phone-shell{
   width:100%; max-width:430px; height:100dvh; background:var(--bg);
   position:relative; overflow:hidden; box-shadow:0 0 0 1px var(--card-border), 0 25px 80px -20px rgba(0,0,0,.4);
@@ -31,46 +31,156 @@ body{display:flex;justify-content:center;align-items:flex-start;background:#0f17
 .nav button{flex:1;height:100%;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text-soft);font-size:9px;font-weight:700;cursor:pointer;transition:.2s}
 .nav button.active{background:var(--hero);color:#fff;box-shadow:0 8px 18px color-mix(in srgb, var(--hero) 30%, transparent)}
 .nav button .icon{font-size:18px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#134E4A;color:#fff;padding:10px 18px;border-radius:12px;font-size:11px;font-weight:800;z-index:999;box-shadow:0 10px 30px rgba(0,0,0,.2);display:none}
+.toast.show{display:block;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 </style>
 </head>
 <body>
 <div class="phone-shell">
   <div class="pageWrap">
-    <iframe data-page="home.html" src="home.html?v=15" class="page active" title="home"></iframe>
+    <iframe data-page="home.html" src="home.html" class="page active" title="home"></iframe>
     <iframe data-page="daily.html" src="about:blank" class="page" title="daily"></iframe>
     <iframe data-page="attendance.html" src="about:blank" class="page" title="attendance"></iframe>
     <iframe data-page="tasks.html" src="about:blank" class="page" title="tasks"></iframe>
   </div>
   <nav class="nav">
-    <button class="active" onclick="switchPage('home.html',this)"><span class="icon">🏠</span><span>الرئيسية</span></button>
-    <button onclick="switchPage('daily.html',this)"><span class="icon">📊</span><span>اليومية</span></button>
-    <button onclick="switchPage('attendance.html',this)"><span class="icon">⏱️</span><span>الحضور</span></button>
-    <button onclick="switchPage('tasks.html',this)"><span class="icon">✓</span><span>المهام</span></button>
+    <button class="active" data-page="home.html" onclick="switchPage('home.html',this)"><span class="icon">🏠</span><span>الرئيسية</span></button>
+    <button data-page="daily.html" onclick="switchPage('daily.html',this)"><span class="icon">📊</span><span>اليومية</span></button>
+    <button data-page="attendance.html" onclick="switchPage('attendance.html',this)"><span class="icon">⏱️</span><span>الحضور</span></button>
+    <button data-page="tasks.html" onclick="switchPage('tasks.html',this)"><span class="icon">✓</span><span>المهام</span></button>
   </nav>
 </div>
+<div class="toast" id="exitToast">اضغط مرة أخرى للخروج من التطبيق</div>
 <script src="drive-sync.js"></script>
 <script>
 const frames=document.querySelectorAll('.page');
-function switchPage(name,btn){
+let currentPage='home.html';
+let lastBackTime=0;
+
+function switchPage(name,btn, push=true){
+  if(currentPage===name && document.querySelector('.page.active')?.src.includes(name)) return;
+  currentPage=name;
   frames.forEach(f=>{
     const is=f.dataset.page===name;
     f.classList.toggle('active',is);
     if(is && f.src.includes('about:blank')){
-      f.src=name+'?v=15';
-      f.onload=()=>{
-        let cur=localStorage.getItem('omar_theme')||'green';
-        if(window.themes && themes[cur] && f.contentDocument){
-          Object.entries(themes[cur]).forEach(([k,v])=>f.contentDocument.documentElement.style.setProperty(k,v));
-        }
+      f.src=name;
+      f.onload=()=>{ 
+        try{ 
+          const cur=localStorage.getItem('omar_theme')||'teal';
+          if(f.contentWindow && f.contentWindow.applyTheme) f.contentWindow.applyTheme(cur,false);
+        }catch(e){}
       };
+    } else if(is){
+      try{
+        const cur=localStorage.getItem('omar_theme')||'teal';
+        if(f.contentWindow && f.contentWindow.applyTheme) f.contentWindow.applyTheme(cur,false);
+      }catch(e){}
     }
   });
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
+  else {
+    const targetBtn=document.querySelector(`.nav button[data-page="${name}"]`);
+    if(targetBtn) targetBtn.classList.add('active');
+  }
+  if(push){
+    try{ history.pushState({page:name}, '', '#'+name); }catch(e){}
+  }
   if(navigator.vibrate) navigator.vibrate(10);
 }
-applyTheme(localStorage.getItem('omar_theme')||'green');
-if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(()=>console.log('✅ PWA Ready - يمكنك تثبيته من كروم'));} window.switchPage=switchPage;
+
+// Back button handling
+function handleBack(){
+  const activeFrame=document.querySelector('.page.active');
+  if(activeFrame && activeFrame.contentWindow){
+    try{
+      const cw=activeFrame.contentWindow;
+      // Check if iframe has open modal - if yes, close it
+      if(cw.document){
+        const openModals=cw.document.querySelectorAll('.modal.open, .modal[style*="flex"], .custom-dialog.open, [style*="display: flex"][id*="Modal"]');
+        for(let m of openModals){
+          if(m.style.display!=='none' && m.classList.contains('open') || m.style.display==='flex'){
+            if(cw.closeFab) { cw.closeFab(); return true; }
+            if(cw.closeAdd) { cw.closeAdd(); return true; }
+            if(cw.closeModal) { cw.closeModal(); return true; }
+            if(cw.closeTaskModal) { cw.closeTaskModal(); return true; }
+            // Generic close
+            m.classList.remove('open');
+            m.style.display='none';
+            return true;
+          }
+        }
+        // Check for task detail view
+        if(cw.document.getElementById('taskDetail') && cw.document.getElementById('taskDetail').style.display!=='none'){
+          if(cw.closeTaskDetail) { cw.closeTaskDetail(); return true; }
+        }
+        // Check daily addModal
+        const addModal=cw.document.getElementById('addModal');
+        if(addModal && addModal.classList.contains('open')){
+          if(cw.closeAdd) { cw.closeAdd(); return true; }
+          addModal.classList.remove('open');
+          return true;
+        }
+      }
+    }catch(e){}
+  }
+  
+  // If not home, go to home
+  if(currentPage!=='home.html'){
+    switchPage('home.html', null, true);
+    return true;
+  }
+  
+  // If home, double press to exit
+  const now=Date.now();
+  if(now - lastBackTime < 2000){
+    return false; // Allow exit
+  } else {
+    lastBackTime=now;
+    const toast=document.getElementById('exitToast');
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'), 2000);
+    if(navigator.vibrate) navigator.vibrate(50);
+    return true;
+  }
+}
+
+window.addEventListener('popstate', (e)=>{
+  if(e.state && e.state.page){
+    if(e.state.page!==currentPage){
+      // Check if we should close modal first
+      const handled=handleBack();
+      if(!handled){
+        // Real exit
+      }
+    }
+  } else {
+    // No state - back pressed
+    const shouldPrevent=handleBack();
+    if(shouldPrevent){
+      try{ history.pushState({page:currentPage}, '', '#'+currentPage); }catch(e){}
+    }
+  }
+});
+
+// Initial history
+try{
+  history.replaceState({page:'home.html'}, '', '#home.html');
+  history.pushState({page:'home.html'}, '', '#home.html');
+}catch(e){}
+
+applyTheme(localStorage.getItem('omar_theme')||'teal');
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(()=>console.log('✅ PWA Ready'));} 
+window.switchPage=switchPage;
+
+// Listen for messages from iframes about internal navigation
+window.addEventListener('message', (e)=>{
+  if(e.data && e.data.type==='pushState'){
+    try{ history.pushState(e.data.state, '', e.data.url||'#'+currentPage); }catch(err){}
+  }
+});
 </script>
 </body>
 </html>

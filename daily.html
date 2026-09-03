@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>اليومية</title>
-<script src="themes.js?v=14"></script>
+<script src="themes.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
 @font-face{font-family:"Optimistic";font-style:normal;font-weight:400 600;font-display:swap;src:url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2")}
@@ -100,8 +100,70 @@ td{padding:7px 3px;border-bottom:1px solid var(--bg-soft);text-align:center;font
 .toast.ok{border-color:#16a34a;background:#f0fdf4}.toast.err{border-color:#ef4444;background:#fef2f2}
 @keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 
+
+/* Fix keyboard covering + 3-col layout */
+
+
+
+.row-3 .group{
+  margin:0 !important;
+}
+.row-3 .group label{
+  font-size:7px !important;
+}
+
+
+.group.wide{
+  grid-column: span 3;
+}
+
+
+
+
+
+
+/* Fix keyboard + 3-col layout - Omar */
+
+
+
+.row-3 .group{ margin:0 !important; }
+.row-3 .group label{ font-size:7px !important; }
+
+
+
+
+#addModal.lower-card .card{
+  margin:24vh auto 0 auto !important;
+  margin-top:24vh !important;
+  transform:translateY(0) !important;
+}
+#addModal.expense-card .card{
+  margin:20vh auto 0 auto !important;
+  margin-top:20vh !important;
+  transform:translateY(0) !important;
+}
+.modal{
+  align-items:flex-start !important;
+  padding-top:2vh !important;
+  padding-bottom:120px !important;
+  overflow-y:auto !important;
+}
+.modal .card{
+  max-height:85dvh !important;
+  overflow-y:auto !important;
+  margin-bottom:24px !important;
+}
+.row-3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  width:100%;
+  margin:5px 0;
+}
+.row-3 .group{ margin:0 !important; }
+
 </style>
-<script src="drive-sync.js?v=9"></script>
+<script src="drive-sync.js"></script>
 <style>html,body{max-width:430px;margin:0 auto!important;background:var(--bg);} body{border-left:1px solid var(--card-border);border-right:1px solid var(--card-border); min-height:100dvh;}
 #toastBox{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:20000;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 .toast{display:flex;gap:8px;align-items:center;background:var(--card);border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.2);min-width:240px;max-width:340px;pointer-events:auto;animation:toastIn .3s}
@@ -151,23 +213,52 @@ td{padding:7px 3px;border-bottom:1px solid var(--bg-soft);text-align:center;font
 <button class="card-ttab" id="ct-amanat" onclick="switchCardTab('amanat')">أمانات</button>
 </div>
 <div id="form-expense">
-<div class="group" style="background:var(--hero);border-color:var(--hero)"><label style="color:#fff">قيمة</label><input id="a-amount" type="number" placeholder="0" onfocus="this.select()"></div>
-<div class="row"><div class="group"><label>محفظة</label><select id="a-wallet"></select></div><div class="group"><label>بند</label><select id="a-item" onchange="clearAmountOnBandChange()"></select></div></div>
-<div class="row"><div class="group"><label>تاريخ</label><input id="a-date" type="date"></div><div class="group"><label>ملاحظة</label><input id="a-note"></div></div>
-<div class="group toggle-row" style="background:var(--card);margin-top:4px"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
+  <div class="row-3">
+    <div class="group"><label>محفظة</label><select id="a-wallet"></select></div>
+    <div class="group" style="background:var(--hero);border-color:var(--hero)"><label style="color:#fff">قيمة</label><input id="a-amount" type="number" placeholder="0" onfocus="this.select()"></div>
+    <div class="group"><label>بند</label><select id="a-item" onchange="clearAmountOnBandChange()"></select></div>
+  </div>
+  <div class="row-3">
+    <div class="group"><label>تاريخ</label><input id="a-date" type="date"></div>
+    <div class="group"><label>ملاحظة</label><input id="a-note" placeholder="..."></div>
+    <div class="group"><label>وسائط 📎</label><input type="file" id="a-attach" accept="image/*,video/*" style="font-size:8px;padding:4px"></div>
+  </div>
+  <div class="group toggle-row" style="background:var(--card);margin-top:6px"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
 </div>
 <div id="form-debt" style="display:none">
-<div class="group" style="background:var(--hero);border-color:var(--hero)"><label style="color:#fff">قيمة</label><input id="a-amount-debt" type="number" placeholder="0" onfocus="this.select()"></div>
-<div class="row"><div class="group"><label>محفظة</label><select id="a-wallet-debt"></select></div><div class="group"><label>نوع</label><select id="a-status"><option value="due">مستحق</option><option value="def">مؤجل</option></select></div></div>
-<div class="row"><div class="group"><label>عليا/ليا</label><select id="a-direction"><option value="عليا">عليا</option><option value="ليا">ليا</option></select></div><div class="group"><label>شخص</label><select id="a-person-debt" onchange="clearAmountOnBandChange()"></select></div></div>
-<div class="row"><div class="group"><label>سحب</label><input id="a-date" type="date"></div><div class="group"><label>سداد</label><input id="a-date-repay" type="date"></div></div>
-<div class="group"><label>ملاحظة</label><input id="a-note-debt"></div>
-<div class="group toggle-row" style="background:var(--card);margin-top:4px"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl-debt" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk-debt" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
+  <div class="row-3">
+    <div class="group"><label>محفظة</label><select id="a-wallet-debt"></select></div>
+    <div class="group" style="background:var(--hero);border-color:var(--hero)"><label style="color:#fff">قيمة</label><input id="a-amount-debt" type="number" placeholder="0" onfocus="this.select()"></div>
+    <div class="group"><label>نوع</label><select id="a-status"><option value="due">مستحق</option><option value="def">آجل</option></select></div>
+  </div>
+  <div class="row-3">
+    <div class="group"><label>عليا/ليا</label><select id="a-direction"><option value="عليا">عليا</option><option value="ليا">ليا</option></select></div>
+    <div class="group"><label>الشخص</label><select id="a-person-debt" onchange="clearAmountOnBandChange()"></select></div>
+    <div class="group"><label>ملاحظة</label><input id="a-note-debt" placeholder="..."></div>
+  </div>
+  <div class="row-3">
+    <div class="group"><label>وسائط 📎</label><input type="file" id="a-attach-debt" accept="image/*,video/*" style="font-size:8px;padding:4px"></div>
+    <div class="group"><label>تاريخ الأخذ</label><input id="a-date" type="date"></div>
+    <div class="group"><label>تاريخ السداد</label><input id="a-date-repay" type="date"></div>
+  </div>
+  <div class="group toggle-row" style="background:var(--card);margin-top:6px"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl-debt" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk-debt" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
 </div>
 <div id="form-amanat" style="display:none">
-<div class="group" style="background:var(--hero);border-color:var(--hero)"><label style="color:#fff">قيمة</label><input id="a-amount-ama" type="number" placeholder="0" onfocus="this.select()"></div>
-<div class="row"><div class="group"><label>محفظة</label><select id="a-wallet-ama"><option>الأمانات</option></select></div><div class="group"><label>شخص</label><select id="a-person-ama" onchange="clearAmountOnBandChange()"></select></div></div>
-<div class="row"><div class="group"><label>تاريخ</label><input id="a-date-ama" type="date"></div><div class="group"><label>ملاحظة</label><input id="a-note-ama"></div></div>
+  <div class="row-3">
+    <div class="group"><label>محفظة</label><select id="a-wallet-ama"><option>الأمانات</option></select></div>
+    <div class="group" style="background:var(--hero);border-color:var(--hero)"><label style="color:#fff">قيمة</label><input id="a-amount-ama" type="number" placeholder="0" onfocus="this.select()"></div>
+    <div class="group"><label>الشخص</label><select id="a-person-ama" onchange="clearAmountOnBandChange()"></select></div>
+  </div>
+  <div class="row-3">
+    <div class="group"><label>سحب/إيداع</label><select id="a-amanat-type"><option value="ايداع">إيداع</option><option value="سحب">سحب</option></select></div>
+    <div class="group"><label>تاريخ</label><input id="a-date-ama" type="date"></div>
+    <div class="group"><label>ملاحظة</label><input id="a-note-ama" placeholder="..."></div>
+  </div>
+  <div class="row-3">
+    <div class="group"><label>وسائط 📎</label><input type="file" id="a-attach-ama" accept="image/*,video/*" style="font-size:8px;padding:4px"></div>
+    <div class="group" style="opacity:0;pointer-events:none"><label>ـ</label><input disabled></div>
+    <div class="group" style="opacity:0;pointer-events:none"><label>ـ</label><input disabled></div>
+  </div>
 </div>
 <div class="card-actions">
 <button onclick="closeAdd()" style="flex:1;padding:8px;background:var(--bg-soft);border:1px solid var(--card-border);border-radius:8px;font-weight:800;font-size:9.3px;color:var(--text)">إلغاء</button>
@@ -243,13 +334,17 @@ function clearAllFilters(){
 function refreshCurrent(){renderFixedSection();if(curTab==='total')renderTotal();else if(curTab==='debt')renderDebt();else renderSimple(curTab)}
 function switchTab(t){curTab=t;document.querySelectorAll('[id^="p-"]').forEach(e=>e.style.display='none');document.getElementById('p-'+t).style.display='block';document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('active'));document.querySelector(`.mtab[data-t="${t}"]`).classList.add('active');refreshCurrent()}
 function setDebtSub(s){curDebtSub=s;document.getElementById('sdue').style.background=s==='due'?'var(--card)':'transparent';document.getElementById('sdef').style.background=s==='def'?'var(--card)':'transparent';document.getElementById('debt-due').style.display=s==='due'?'block':'none';document.getElementById('debt-def').style.display=s==='def'?'block':'none'}
-function switchCardTab(t){
+function switchCardTab(t){ // Clear amounts when switching tab
   try{ ['a-amount','a-amount-debt','a-amount-ama'].forEach(id=>{let el=document.getElementById(id); if(el && !editingId){ el.value=''; }}); }catch(e){} 
 cardTab=t;document.querySelectorAll('.card-ttab').forEach(b=>b.classList.remove('active'));document.getElementById('ct-'+t)?.classList.add('active');document.getElementById('form-expense').style.display=(t==='expense'||t==='income')?'block':'none';document.getElementById('form-debt').style.display=t==='debt'?'block':'none';document.getElementById('form-amanat').style.display=t==='amanat'?'block':'none';let list=[];if(t==='expense')list=getBands('expense');else if(t==='income')list=getBands('income');else if(t==='debt')list=[...getBands('debt_due'),...getBands('debt_def')];else if(t==='amanat')list=getBands('amanat');const opts=list.map(b=>`<option>${b}</option>`).join('')+'<option value="__new__">+ جديد</option>';if(t==='expense'||t==='income'){document.getElementById('a-item').innerHTML=opts;document.getElementById('a-wallet').innerHTML=wallets.map(w=>`<option>${w}</option>`).join('')}if(t==='debt'){document.getElementById('a-person-debt').innerHTML=opts;document.getElementById('a-wallet-debt').innerHTML=wallets.map(w=>`<option>${w}</option>`).join('')}if(t==='amanat'){document.getElementById('a-person-ama').innerHTML=opts}
-  try{ let card=document.querySelector('.card'); if(card && document.getElementById('addModal').classList.contains('open')){ if(t==='expense'){ card.style.transform='translateY(-2vh)'; card.style.marginTop='12vh'; }else{ card.style.transform='translateY(3vh)'; card.style.marginTop='15vh'; } } }catch(e){}
+  // Keep card down 2cm for all tabs (income/debt/amanat)
+  try{ let card=document.querySelector('.card'); if(card && document.getElementById('addModal').classList.contains('open')){ card.style.transform='translateY(-2vh)'; card.style.marginTop='12vh'; } }catch(e){}
   setTimeout(()=>{ let amt=document.getElementById(t==='debt'?'a-amount-debt':t==='amanat'?'a-amount-ama':'a-amount'); if(amt){ if(!editingId) amt.value=''; amt.focus(); try{amt.select();}catch(e){} } },90)
-}
-
+  // Keep card up when switching tabs + focus value
+  try{ let card=document.querySelector('.card'); if(card && document.getElementById('addModal').classList.contains('open')){ card.style.transform='translateY(-6vh)'; card.style.marginTop='2vh'; } }catch(e){}
+  setTimeout(()=>{ let amt=document.getElementById(t==='debt'?'a-amount-debt':t==='amanat'?'a-amount-ama':'a-amount'); if(amt){ if(!editingId) amt.value=''; amt.focus(); try{amt.select();}catch(e){} } },90)
+  // Focus directly on value when clicking any tab
+  setTimeout(()=>{ let amt=document.getElementById(t==='debt'?'a-amount-debt':t==='amanat'?'a-amount-ama':'a-amount'); if(amt){ if(!editingId) amt.value=''; amt.focus(); try{amt.select();}catch(e){} } },90)}
 function setDayFilter(type,mode){const prefix=type==='expense'?'exp':type==='income'?'inc':type==='amanat'?'ama':'debt';const fromEl=document.getElementById(`f-${prefix}-from`);const toEl=document.getElementById(`f-${prefix}-to`);const today=new Date().toISOString().slice(0,10);if(mode==='today'){fromEl.value=today;toEl.value=today}else if(mode==='month'){const{first,last}=getMonthRange(curYM);fromEl.value=first;toEl.value=last}else if(mode==='all'){fromEl.value='';toEl.value=''}if(type==='debt')renderDebt();else if(type==='total')renderTotal();else renderSimple(type)}
 
 function toggleExclude(){excludeFromBalanceCurrent=!excludeFromBalanceCurrent;updateExcludeBtn()}
@@ -267,19 +362,34 @@ let defOAll=0,defLAll=0;allMonth.filter(t=>t.type==='debt'&&(t.subType==='debt_d
 const debtDefNetAll=defLAll-defOAll;
 const isActive=includeDeferredInBalance;
 const netThere = incomeMonth - expenseMonth - dueO + dueL + (isActive ? debtDefNetAll : 0);
-// ثابت في كل التبوابات حتى في الإجمالي - نفس الشكل
 const top5=`<div class="kpi-grid-5">
 <div class="stat pos"><small>إجمالي الدخل</small><b>${incomeMonth.toLocaleString()}</b></div>
 <div class="stat neg"><small>إجمالي المصروف</small><b>${expenseMonth.toLocaleString()}</b></div>
-<div class="stat neg"><small>إجمالي المستحق</small><b>${(dueO - dueL).toLocaleString()}</b></div>
+<div class="stat neg"><small>إجمالي المستحقة</small><b>${(dueO - dueL).toLocaleString()}</b></div>
 <div class="stat neu"><small>الصافي هناك</small><b>${netThere.toLocaleString()}</b></div>
 <div class="stat def ${isActive?'active':'inactive'}" onclick="toggleDeferredInclude()"><span style="font-size:5px;background:${isActive?'#dcfce7':'#fee2e2'};color:${isActive?'#16a34a':'#ef4444'};padding:1px 4px;border-radius:10px">${isActive?'✅ مفعلة':'❌ مخفية'}</span><small>المؤجلة ⏳</small><b>${debtDefNetAll.toLocaleString()}</b></div>
 </div>`;
 document.querySelectorAll('[id^="stats-"]').forEach(el=>{
-  el.innerHTML=top5;
+if(el.id==='stats-debt'){
+let o=0,l=0,od=0,ld=0;
+allMonth.filter(t=>t.type==='debt').forEach(t=>{
+if(t.subType==='debt_due'||t.status==='due'){if(!t.excludeFromBalance){if(t.direction==='عليا')o+=Number(t.amount);else l+=Number(t.amount)}}
+else{if(t.direction==='عليا')od+=Number(t.amount);else ld+=Number(t.amount)}
+});
+const safiDue = l - o;
+const safiDef = ld - od;
+el.innerHTML=`
+<div style="display:flex;gap:4px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;scrollbar-width:none">
+  <div class="stat neg" style="min-width:88px"><small>عليا مستحق</small><b>${o.toLocaleString()}</b></div>
+  <div class="stat pos" style="min-width:88px"><small>ليا مستحق</small><b>${l.toLocaleString()}</b></div>
+  <div class="stat neu" style="min-width:88px;border-color:var(--hero)"><small>صافي المستحق</small><b>${safiDue.toLocaleString()}</b></div>
+  <div class="stat neg" style="min-width:88px"><small>عليا مؤجل</small><b>${od.toLocaleString()}</b></div>
+  <div class="stat pos" style="min-width:88px"><small>ليا مؤجل</small><b>${ld.toLocaleString()}</b></div>
+  <div class="stat neu" style="min-width:88px"><small>صافي المؤجل</small><b>${safiDef.toLocaleString()}</b></div>
+</div>`;
+}else{el.innerHTML=top5}
 });
 }
-
 function renderSimple(type){
 renderStats(type);
 const q=document.getElementById(type==='expense'?'f-exp-q':type==='income'?'f-inc-q':'f-ama-q')?.value||'';
@@ -437,15 +547,18 @@ function openAdd(){
   setIfExists('a-date',todayISO);
   setIfExists('a-date-ama',todayISO);
   document.getElementById('addModal').classList.add('open');
+  // FIX: مصروفات مظبوط، دخل/ديون/أمانات ننزلهم جامد لتحت (كانوا مرفوعين زيادة)
   setTimeout(()=>{
-    let card=document.querySelector('.card');
+    let card=document.querySelector('#addModal .card') || document.querySelector('#addModal > div') || document.querySelector('.card');
     if(card){
       if(cardTab==='expense'){
+        // مصروفات - مظبوط
         card.style.transform='translateY(-2vh)';
         card.style.marginTop='12vh';
-      }else{
-        card.style.transform='translateY(3vh)';
-        card.style.marginTop='15vh';
+      } else {
+        // دخل وديون وأمانات - ننزلهم جامد لتحت
+        card.style.transform='translateY(12vh)';
+        card.style.marginTop='28vh';
       }
     }
     let el=document.getElementById(cardTab==='debt'?'a-amount-debt':cardTab==='amanat'?'a-amount-ama':'a-amount');
@@ -454,7 +567,7 @@ function openAdd(){
 }
 
 
-function closeAdd(){let card=document.querySelector('.card'); if(card){card.style.transform=''; card.style.marginTop='';} document.getElementById('addModal').classList.remove('open');editingId=null}
+function closeAdd(){let modal=document.getElementById('addModal'); if(modal){ modal.classList.remove('lower-card','expense-card'); } let card=document.querySelector('#addModal .card'); if(card){card.style.transform=''; card.style.marginTop=''; card.style.margin='';} document.getElementById('addModal').classList.remove('open');editingId=null}
 function saveTx(){
 let type=cardTab;let item,person,wallet,amount,date,note,direction,status;
 if(type==='expense'||type==='income'){
