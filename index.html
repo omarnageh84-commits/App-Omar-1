@@ -3,82 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<link rel="manifest" href="manifest.json?v=21">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0F766E">
-<title>App-Omar</title>
 <style>
-:root{--bg:#F0FDFA;--card:#FFFFFF;--card-border:#99F6E0;--text:#134E4A;--text-soft:#0D9488;--hero:#0F766E;--nav-bg:#FFFFFF}
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Tajawal,sans-serif}
-html,body{height:100%;background:#0F766E;overflow:hidden}
-body{display:flex;justify-content:center;background:var(--bg)}
-.phone{width:100%;max-width:430px;height:100dvh;background:var(--bg);display:flex;flex-direction:column;position:relative}
-.wrap{flex:1;position:relative;overflow:hidden;background:var(--bg)}
-.page{position:absolute;inset:0;width:100%;height:100%;border:0;opacity:0;pointer-events:none;transform:translateX(10px);transition:opacity .15s,transform .15s;background:var(--bg)}
-.page.active{opacity:1;pointer-events:auto;transform:translateX(0);z-index:2}
-.nav{height:62px;border-top:1.5px solid var(--card-border);background:var(--nav-bg);display:flex;padding:4px;gap:4px}
-.nav button{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:12px;color:var(--text-soft);font-size:10px;font-weight:700;cursor:pointer}
+:root{ --bg:#F0FDFA; --card:#FFFFFF; --card-border:#5EEAD4; --text:#134E4A; --text-soft:#0D9488; --hero:#0F766E; --accent:#14B8A6;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Tahoma,Arial,sans-serif}
+html,body{height:100%;background:var(--bg);overflow:hidden}
+body{display:flex;justify-content:center;align-items:flex-start}
+.phone-shell{width:100%;max-width:430px;height:100dvh;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.pageWrap{flex:1;position:relative;background:var(--bg);overflow:hidden}
+.page{position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;pointer-events:none;background:var(--bg)}
+.page.active{opacity:1;pointer-events:auto;z-index:2}
+.nav{height:68px;margin:8px;background:#fff;border:1px solid var(--card-border);border-radius:16px;display:flex;align-items:center;padding:5px;gap:4px;z-index:10}
+.nav button{flex:1;height:100%;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:12px;color:var(--text-soft);font-size:10px;font-weight:700;cursor:pointer}
 .nav button.active{background:var(--hero);color:#fff}
-.nav b{font-size:18px}
+.nav button .icon{font-size:18px}
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:#134E4A;color:#fff;padding:9px 16px;border-radius:10px;font-size:11px;font-weight:700;z-index:999;display:none}
+.toast.show{display:block}
 </style>
 </head>
 <body>
-<div class="phone">
-  <div class="wrap" id="wrap">
-    <iframe data-p="daily.html" src="daily.html?v=21" class="page active" title="daily"></iframe>
-    <iframe data-p="attendance.html" src="about:blank" class="page" title="attendance"></iframe>
-    <iframe data-p="tasks.html" src="about:blank" class="page" title="tasks"></iframe>
+<div class="phone-shell">
+  <div class="pageWrap">
+    <iframe data-page="daily.html" src="daily.html" class="page active" title="daily"></iframe>
+    <iframe data-page="attendance.html" src="about:blank" class="page" title="attendance"></iframe>
+    <iframe data-page="tasks.html" src="about:blank" class="page" title="tasks"></iframe>
   </div>
   <nav class="nav">
-    <button class="active" onclick="go('daily.html',0)"><b>📊</b><span>اليومية</span></button>
-    <button onclick="go('attendance.html',1)"><b>⏱️</b><span>الحضور</span></button>
-    <button onclick="go('tasks.html',2)"><b>✓</b><span>المهام</span></button>
+    <button class="active" data-page="daily.html" onclick="switchPage('daily.html',this)"><span class="icon">📊</span><span>اليومية</span></button>
+    <button data-page="attendance.html" onclick="switchPage('attendance.html',this)"><span class="icon">⏱️</span><span>الحضور</span></button>
+    <button data-page="tasks.html" onclick="switchPage('tasks.html',this)"><span class="icon">✓</span><span>المهام</span></button>
   </nav>
 </div>
+<div class="toast" id="exitToast">اضغط مرة أخرى للخروج</div>
+<script src="drive-sync.js"></script>
 <script>
-let cur=0;
-const pages=document.querySelectorAll('.page');
-const map=['daily.html','attendance.html','tasks.html'];
-function go(name,idx,action){
-  if(idx===undefined) idx=map.indexOf(name);
-  cur=idx;
-  pages.forEach(p=>{
-    const is=p.dataset.p===name;
-    if(is){
-      let src=name+'?v=21';
-      if(action) src+='&action='+action;
-      if(p.src.includes('about:blank') || action) p.src=src;
-      p.classList.add('active');
-      if(action){
-        p.onload=()=>{ try{ p.contentWindow.postMessage({type:'quickAction', action:action}, '*'); }catch(e){} };
-      }
-    } else { p.classList.remove('active'); }
+const frames=document.querySelectorAll('.page');
+let currentPage='daily.html';
+let lastBackTime=0;
+
+function switchPage(name,btn,push=true){
+  if(currentPage===name && document.querySelector('.page.active')?.dataset.page===name) return;
+  currentPage=name;
+  frames.forEach(f=>{
+    const is=f.dataset.page===name;
+    f.classList.toggle('active',is);
+    if(is && f.src.includes('about:blank')){
+      f.src=name;
+    }
   });
-  document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else{
+    const tb=document.querySelector(`.nav button[data-page="${name}"]`);
+    if(tb) tb.classList.add('active');
+  }
+  if(push){ try{ history.pushState({page:name},'', '#'+name);}catch(e){} }
 }
-function handleHash(){
-  const h=(location.hash||'#daily').replace('#','');
-  const [page,act]=h.split('/');
-  if(page==='daily') go('daily.html',0,act);
-  else if(page==='attendance') go('attendance.html',1,act||'today');
-  else if(page==='tasks') go('tasks.html',2,act||'new');
-  else if(page==='expense') go('daily.html',0,'expense');
-  else go('daily.html',0);
+
+function handleActionFromShortcut(){
+  const params=new URLSearchParams(location.search);
+  const page=params.get('page');
+  const action=params.get('action');
+  if(!page) return;
+  const map={daily:'daily.html',attendance:'attendance.html',tasks:'tasks.html'};
+  const target=map[page]||page;
+  switchPage(target,null,true);
+  // ابعت الاكشن للايفريم بعد ما يحمل
+  setTimeout(()=>{
+    const fr=document.querySelector(`iframe[data-page="${target}"]`);
+    if(fr && fr.contentWindow){
+      try{ fr.contentWindow.postMessage({type:'quickAction', action:action}, '*'); }catch(e){}
+      // fallback: حاول تفتح المودال مباشرة لو الفانكشن موجودة
+      try{
+        const cw=fr.contentWindow;
+        if(action==='expense' && cw.openAdd) cw.openAdd('expense');
+        if(action==='new' && cw.openAdd) cw.openAdd();
+        if(action==='in' && cw.quickIn) cw.quickIn();
+        if(action==='out' && cw.quickOut) cw.quickOut();
+      }catch(e){}
+    }
+  },800);
 }
-let sx=0;
-const wrap=document.getElementById('wrap');
-wrap.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
-wrap.addEventListener('touchend',e=>{
-  const dx=e.changedTouches[0].clientX - sx;
-  if(Math.abs(dx)<60) return;
-  if(dx<0 && cur<2) go(map[cur+1],cur+1);
-  if(dx>0 && cur>0) go(map[cur-1],cur-1);
-},{passive:true});
-window.addEventListener('hashchange', handleHash);
-window.addEventListener('load', ()=>{
-  handleHash();
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js?v=21').catch(()=>{}); }
+
+function handleBack(){
+  const activeFrame=document.querySelector('.page.active');
+  if(activeFrame && activeFrame.contentWindow){
+    try{
+      const cw=activeFrame.contentWindow;
+      if(cw.document){
+        const addModal=cw.document.getElementById('addModal');
+        if(addModal && (addModal.classList.contains('open') || addModal.style.display==='flex')){ if(cw.closeAdd) cw.closeAdd(); return true; }
+        const taskDetail=cw.document.getElementById('taskDetail');
+        if(taskDetail && taskDetail.style.display!=='none'){ if(cw.closeTaskDetail) cw.closeTaskDetail(); return true; }
+      }
+    }catch(e){}
+  }
+  if(currentPage!=='daily.html'){ switchPage('daily.html',null,true); return true; }
+  const now=Date.now();
+  if(now-lastBackTime<2000) return false;
+  lastBackTime=now;
+  const toast=document.getElementById('exitToast');
+  toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2000);
+  return true;
+}
+
+window.addEventListener('popstate',(e)=>{
+  if(e.state && e.state.page && e.state.page!==currentPage){
+    const shouldPrevent=handleBack();
+    if(shouldPrevent){ try{ history.pushState({page:currentPage},'', '#'+currentPage);}catch(e){} }
+  } else if(!e.state){
+    const shouldPrevent=handleBack();
+    if(shouldPrevent){ try{ history.pushState({page:currentPage},'', '#'+currentPage);}catch(e){} }
+  }
 });
-window.go=go;
+
+try{ history.replaceState({page:'daily.html'},'', '#daily.html'); history.pushState({page:'daily.html'},'', '#daily.html'); }catch(e){}
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').then(()=>console.log('PWA Ready v15')); }
+
+window.switchPage=switchPage;
+window.addEventListener('load', handleActionFromShortcut);
 </script>
 </body>
 </html>
