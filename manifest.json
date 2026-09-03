@@ -22,55 +22,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "shortcuts": [
-    {
-      "name": "إدخال مصروف",
-      "short_name": "مصروف",
-      "description": "إدخال مصروف جديد في اليومية",
-      "url": "./index.html?page=daily&action=expense",
-      "icons": [
-        {
-          "src": "icon_192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "مهمة جديدة",
-      "short_name": "مهمة",
-      "description": "إضافة مهمة سريعة",
-      "url": "./index.html?page=tasks&action=new",
-      "icons": [
-        {
-          "src": "icon_192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "تسجيل حضور",
-      "short_name": "حضور",
-      "description": "تسجيل حضور الآن",
-      "url": "./index.html?page=attendance&action=in",
-      "icons": [
-        {
-          "src": "icon_192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "تسجيل انصراف",
-      "short_name": "انصراف",
-      "description": "تسجيل انصراف الآن",
-      "url": "./index.html?page=attendance&action=out",
-      "icons": [
-        {
-          "src": "icon_192.png",
-          "sizes": "192x192"
-        }
-      ]
-    }
   ]
 }
