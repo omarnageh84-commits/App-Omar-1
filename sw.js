@@ -1,29 +1,39 @@
-const CACHE='app-omar-v14';
-const ASSETS=['./','./index.html','./home.html','./daily.html','./attendance.html','./tasks.html','./themes.js','./drive-sync.js','./manifest.json','./icon_192.png','./icon_512.png'];
-
-self.addEventListener('install',e=>{
-  self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).catch(()=>{}));
+const CACHE = 'app-omar-v15-fast';
+const CORE = [
+  './',
+  './index.html?v=15',
+  './daily.html?v=15',
+  './manifest.json?v=15',
+  './themes.js',
+  './icon_192.png',
+  './icon_512.png'
+];
+self.addEventListener('install', e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()));
 });
-
-self.addEventListener('activate',e=>{
-  e.waitUntil(
-    caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())
-  );
+self.addEventListener('activate', e=>{
+  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
-
-self.addEventListener('fetch',e=>{
-  const url = e.request.url;
-  if(url.includes('themes.js') || url.includes('script.google.com') || url.includes('script.googleusercontent.com') || url.includes('googleapis.com') || url.includes('drive.google.com')) return;
-  e.respondWith(
-    caches.match(e.request).then(r=>{
-      if(r) return r;
-      return fetch(e.request).then(res=>{
-        if(e.request.method==='GET' && res.status===200 && e.request.url.startsWith(self.location.origin)){
-          let clone=res.clone(); caches.open(CACHE).then(c=>c.put(e.request, clone));
-        }
-        return res;
-      }).catch(()=>r);
-    })
-  );
+self.addEventListener('fetch', e=>{
+  if(e.request.method!=='GET') return;
+  const url = new URL(e.request.url);
+  // Network first for html
+  if(url.pathname.endsWith('.html')){
+    e.respondWith(fetch(e.request).then(r=>{
+      const clone = r.clone();
+      caches.open(CACHE).then(c=>c.put(e.request, clone));
+      return r;
+    }).catch(()=>caches.match(e.request)));
+    return;
+  }
+  // Cache first for others
+  e.respondWith(caches.match(e.request).then(cached=>{
+    return cached || fetch(e.request).then(r=>{
+      if(r.ok){
+        const clone = r.clone();
+        caches.open(CACHE).then(c=>c.put(e.request, clone));
+      }
+      return r;
+    });
+  }));
 });
