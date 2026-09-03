@@ -1,10 +1,9 @@
 {
-  "name": "App-Omar - نظام عمر",
+  "name": "App-Omar",
   "short_name": "App-Omar",
-  "description": "نظام إدارة يومية وحضور ومهام عربي RTL",
-  "start_url": "./index.html?v=15",
+  "start_url": "./index.html?v=17",
   "display": "standalone",
-  "background_color": "#F0FDFA",
+  "background_color": "#0F766E",
   "theme_color": "#0F766E",
   "orientation": "portrait",
   "lang": "ar",

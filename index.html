@@ -3,123 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<link rel="manifest" href="manifest.json?v=15">
-<meta name="theme-color" content="#0F766E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#16A34A">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="themes.js"></script>
 <style>
-:root{ --bg:#F0FDFA; --bg-soft:#CCFBF1; --card:#FFFFFF; --card-border:#5EEAD4; --text:#134E4A; --text-soft:#0D9488; --primary:#0F766E; --hero:#0F766E; --accent:#14B8A6; --nav-bg: rgba(255,255,255,0.92); }
-*{box-sizing:border-box;margin:0;padding:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif}
-html,body{height:100%;background:#F0FDFA;overflow:hidden}
+:root{ --bg:#F0FDF4; --bg-soft:#DCFCE7; --card:#FFFFFF; --card-border:#BBF7D0; --text:#14532D; --text-soft:#4ADE80; --primary:#16A34A; --hero:#16A34A; --accent:#22C55E; --nav-bg: rgba(255,255,255,0.92); }
+*{box-sizing:border-box;margin:0;padding:0;font-family:'IBM Plex Sans Arabic',sans-serif}
+html,body{height:100%;background:var(--bg);overflow:hidden}
 body{display:flex;justify-content:center;align-items:flex-start;background:var(--bg);}
-.phone-shell{width:100%; max-width:430px; height:100dvh; background:var(--bg); position:relative; overflow:hidden; display:flex; flex-direction:column;}
-@media(min-width:500px){ .phone-shell{ margin-top:12px; height:calc(100dvh - 24px); border-radius:28px; border:8px solid #111; box-shadow:0 25px 80px -20px rgba(0,0,0,.4); } }
+.phone-shell{
+  width:100%; max-width:430px; height:100dvh; background:var(--bg);
+  position:relative; overflow:hidden; box-shadow:0 0 0 1px var(--card-border), 0 25px 80px -20px rgba(0,0,0,.4);
+  display:flex; flex-direction:column;
+}
+@media(min-width:500px){
+  .phone-shell{ margin-top:12px; height:calc(100dvh - 24px); border-radius:28px; border:8px solid #111; }
+}
 .pageWrap{flex:1;position:relative;background:var(--bg);overflow:hidden}
-.page{position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;pointer-events:none;transition:opacity .15s;background:var(--bg)}
+.page{position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;pointer-events:none;transition:opacity .22s;background:var(--bg)}
 .page.active{opacity:1;pointer-events:auto;z-index:2}
-.nav{height:68px; margin:8px; background:var(--nav-bg); backdrop-filter:blur(24px) saturate(200%); border:1.5px solid var(--card-border); border-radius:18px; display:flex;align-items:center;padding:5px;gap:4px;z-index:10; box-shadow: 0 10px 30px -12px rgba(0,0,0,.15);}
-.nav button{flex:1;height:100%;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:12px;color:var(--text-soft);font-size:10px;font-weight:700;cursor:pointer;transition:.15s}
-.nav button.active{background:var(--hero);color:#fff;box-shadow:0 8px 18px rgba(15,118,110,.25)}
-.nav button .icon{font-size:20px}
-#fastSplash{position:fixed;inset:0;background:#F0FDFA;z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity .25s}
-#fastSplash.hide{opacity:0;pointer-events:none}
-@keyframes spin{to{transform:rotate(360deg)}}
+.nav{
+  height:72px; margin:10px; background:var(--nav-bg); backdrop-filter:blur(24px) saturate(200%);
+  border:1.5px solid var(--card-border); border-radius:20px; display:flex;align-items:center;padding:6px;gap:5px;z-index:10;
+  box-shadow: 0 10px 30px -12px rgba(0,0,0,.15);
+}
+.nav button{flex:1;height:100%;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text-soft);font-size:9px;font-weight:700;cursor:pointer;transition:.2s}
+.nav button.active{background:var(--hero);color:#fff;box-shadow:0 8px 18px color-mix(in srgb, var(--hero) 30%, transparent)}
+.nav button .icon{font-size:18px}
 </style>
-<script>
-try{
-  const saved=localStorage.getItem('omar_theme')||'teal';
-  const themes={
-    teal:{'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E','--accent':'#14B8A6','--nav-bg':'rgba(255,255,255,0.92)'},
-    green:{'--bg':'#F0FDF4','--bg-soft':'#DCFCE7','--card':'#FFFFFF','--card-border':'#BBF7D0','--text':'#14532D','--text-soft':'#4ADE80','--hero':'#16A34A','--accent':'#22C55E','--nav-bg':'rgba(255,255,255,0.92)'}
-  };
-  const cur=themes[saved]||themes.teal;
-  Object.entries(cur).forEach(([k,v])=> document.documentElement.style.setProperty(k,v));
-}catch(e){}
-</script>
-<script src="data:application/javascript;base64,Y29uc3QgdGhlbWVzID0gewogIGdyZWVuOiB7Jy0tYmcnOicjRjBGREY0JywnLS1iZy1zb2Z0JzonI0RDRkNFNycsJy0tY2FyZCc6JyNGRkZGRkYnLCctLWNhcmQtYm9yZGVyJzonI0JCRjdEMCcsJy0tdGV4dCc6JyMxNDUzMkQnLCctLXRleHQtc29mdCc6JyM0QURFODAnLCctLWhlcm8nOicjMTZBMzRBJywnLS1hY2NlbnQnOicjMjJDNTVFJywnLS1uYXYtYmcnOidyZ2JhKDI1NSwyNTUsMjU1LDAuOTIpJ30sCiAgZGFyazogeyctLWJnJzonIzAyMDYxNycsJy0tYmctc29mdCc6JyMxRTI5M0InLCctLWNhcmQnOicjMEYxNzJBJywnLS1jYXJkLWJvcmRlcic6JyMzMzQxNTUnLCctLXRleHQnOicjRjhGQUZDJywnLS10ZXh0LXNvZnQnOicjNjQ3NDhCJywnLS1oZXJvJzonIzIyQzU1RScsJy0tYWNjZW50JzonIzE2QTM0QScsJy0tbmF2LWJnJzoncmdiYSgxNSwyMyw0MiwwLjkyKSd9LAogIGJsdWU6IHsnLS1iZyc6JyNFRkY2RkYnLCctLWJnLXNvZnQnOicjREJFQUZFJywnLS1jYXJkJzonI0ZGRkZGRicsJy0tY2FyZC1ib3JkZXInOicjOTNDNUZEJywnLS10ZXh0JzonIzFFM0E4QScsJy0tdGV4dC1zb2Z0JzonIzNCODJGNicsJy0taGVybyc6JyMyNTYzRUInLCctLWFjY2VudCc6JyMxRDRFRDgnLCctLW5hdi1iZyc6J3JnYmEoMjU1LDI1NSwyNTUsMC45MiknfSwKICBwdXJwbGU6IHsnLS1iZyc6JyNGNUYzRkYnLCctLWJnLXNvZnQnOicjRURFOUZFJywnLS1jYXJkJzonI0ZGRkZGRicsJy0tY2FyZC1ib3JkZXInOicjQzRCNUZEJywnLS10ZXh0JzonIzRDMUQ5NScsJy0tdGV4dC1zb2Z0JzonIzhCNUNGNicsJy0taGVybyc6JyM3QzNBRUQnLCctLWFjY2VudCc6JyM2RDI4RDknLCctLW5hdi1iZyc6J3JnYmEoMjU1LDI1NSwyNTUsMC45MiknfSwKICBvcmFuZ2U6IHsnLS1iZyc6JyNGRkZCRUInLCctLWJnLXNvZnQnOicjRkVGM0M3JywnLS1jYXJkJzonI0ZGRkZGRicsJy0tY2FyZC1ib3JkZXInOicjRkNEMzREJywnLS10ZXh0JzonIzc4MzUwRicsJy0tdGV4dC1zb2Z0JzonI0Q5NzcwNicsJy0taGVybyc6JyNFQTU4MEMnLCctLWFjY2VudCc6JyNGOTczMTYnLCctLW5hdi1iZyc6J3JnYmEoMjU1LDI1NSwyNTUsMC45MiknfSwKICByb3NlOiB7Jy0tYmcnOicjRkZGMUYyJywnLS1iZy1zb2Z0JzonI0ZGRTRFNicsJy0tY2FyZCc6JyNGRkZGRkYnLCctLWNhcmQtYm9yZGVyJzonI0ZEQTRBRicsJy0tdGV4dCc6JyM4ODEzMzcnLCctLXRleHQtc29mdCc6JyNFMTFENDgnLCctLWhlcm8nOicjRTExRDQ4JywnLS1hY2NlbnQnOicjQkUxMjNDJywnLS1uYXYtYmcnOidyZ2JhKDI1NSwyNTUsMjU1LDAuOTIpJ30sCiAgdGVhbDogeyctLWJnJzonI0YwRkRGQScsJy0tYmctc29mdCc6JyNDQ0ZCRjEnLCctLWNhcmQnOicjRkZGRkZGJywnLS1jYXJkLWJvcmRlcic6JyM1RUVBRDQnLCctLXRleHQnOicjMTM0RTRBJywnLS10ZXh0LXNvZnQnOicjMEQ5NDg4JywnLS1oZXJvJzonIzBGNzY2RScsJy0tYWNjZW50JzonIzE0QjhBNicsJy0tbmF2LWJnJzoncmdiYSgyNTUsMjU1LDI1NSwwLjkyKSd9LAogIG5pZ2h0OiB7Jy0tYmcnOicjMEIwRjFBJywnLS1iZy1zb2Z0JzonIzFBMjMzMicsJy0tY2FyZCc6JyMxNTFEMkEnLCctLWNhcmQtYm9yZGVyJzonIzJBMzQ0MScsJy0tdGV4dCc6JyNFMkU4RjAnLCctLXRleHQtc29mdCc6JyM2NDc0OEInLCctLWhlcm8nOicjRjU5RTBCJywnLS1hY2NlbnQnOicjRkJCRjI0JywnLS1uYXYtYmcnOidyZ2JhKDIxLDI5LDQyLDAuOTIpJ30KfTsKCmZ1bmN0aW9uIGFwcGx5VGhlbWUobmFtZSwgYnJvYWRjYXN0PXRydWUpewogIGNvbnN0IHQgPSB0aGVtZXNbbmFtZV0gfHwgdGhlbWVzLmdyZWVuOwogIE9iamVjdC5lbnRyaWVzKHQpLmZvckVhY2goKFtrLHZdKT0+IGRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5zdHlsZS5zZXRQcm9wZXJ0eShrLHYpKTsKICB0cnl7IGxvY2FsU3RvcmFnZS5zZXRJdGVtKCdvbWFyX3RoZW1lJywgbmFtZSk7IH1jYXRjaChlKXt9CiAgY29uc3QgbWV0YSA9IGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3IoJ21ldGFbbmFtZT0idGhlbWUtY29sb3IiXScpOwogIGlmKG1ldGEpIG1ldGEuY29udGVudCA9IHRbJy0taGVybyddOwogIAogIGlmKGJyb2FkY2FzdCl7CiAgICB0cnl7CiAgICAgIGlmKHdpbmRvdy5wYXJlbnQgJiYgd2luZG93LnBhcmVudCE9PXdpbmRvdyAmJiB3aW5kb3cucGFyZW50LmFwcGx5VGhlbWUpewogICAgICAgIHdpbmRvdy5wYXJlbnQuYXBwbHlUaGVtZShuYW1lLCBmYWxzZSk7CiAgICAgIH0KICAgIH1jYXRjaChlKXt9CiAgICB0cnl7CiAgICAgIGNvbnN0IGZyYW1lcyA9IGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJ2lmcmFtZS5wYWdlLCBpZnJhbWUnKTsKICAgICAgZnJhbWVzLmZvckVhY2goZj0+ewogICAgICAgIHRyeXsKICAgICAgICAgIGlmKGYuY29udGVudFdpbmRvdyAmJiBmLmNvbnRlbnRXaW5kb3cuYXBwbHlUaGVtZSl7CiAgICAgICAgICAgIGYuY29udGVudFdpbmRvdy5hcHBseVRoZW1lKG5hbWUsIGZhbHNlKTsKICAgICAgICAgIH0KICAgICAgICB9Y2F0Y2goZSl7fQogICAgICB9KTsKICAgIH1jYXRjaChlKXt9CiAgfQp9Cgp3aW5kb3cudGhlbWVzID0gdGhlbWVzOwp3aW5kb3cuYXBwbHlUaGVtZSA9IGFwcGx5VGhlbWU7CgooZnVuY3Rpb24oKXsKICB0cnl7CiAgICBjb25zdCBzYXZlZCA9IGxvY2FsU3RvcmFnZS5nZXRJdGVtKCdvbWFyX3RoZW1lJykgfHwgJ2dyZWVuJzsKICAgIGNvbnN0IGN1ciA9IHRoZW1lc1tzYXZlZF0gfHwgdGhlbWVzLmdyZWVuOwogICAgT2JqZWN0LmVudHJpZXMoY3VyKS5mb3JFYWNoKChbayx2XSk9PiBkb2N1bWVudC5kb2N1bWVudEVsZW1lbnQuc3R5bGUuc2V0UHJvcGVydHkoayx2KSk7CiAgICBjb25zdCBtZXRhID0gZG9jdW1lbnQucXVlcnlTZWxlY3RvcignbWV0YVtuYW1lPSJ0aGVtZS1jb2xvciJdJyk7CiAgICBpZihtZXRhKSBtZXRhLmNvbnRlbnQgPSBjdXJbJy0taGVybyddOwogIH1jYXRjaChlKXt9Cn0pKCk7Cgp3aW5kb3cuYWRkRXZlbnRMaXN0ZW5lcignc3RvcmFnZScsIChlKT0+ewogIGlmKGUua2V5PT09J29tYXJfdGhlbWUnICYmIGUubmV3VmFsdWUpewogICAgYXBwbHlUaGVtZShlLm5ld1ZhbHVlLCBmYWxzZSk7CiAgfQp9KTsK" defer></script>
 </head>
 <body>
-<div id="fastSplash"><div style="width:36px;height:36px;border:3px solid #CCFBF1;border-top-color:#0F766E;border-radius:50%;animation:spin .7s linear infinite"></div></div>
-
 <div class="phone-shell">
   <div class="pageWrap">
-    <!-- افتراضي: اليومية - أخف صفحة -->
-    <iframe data-page="daily.html" src="daily.html?v=15" class="page active" title="daily" loading="eager"></iframe>
-    <iframe data-page="attendance.html" src="about:blank" class="page" title="attendance" loading="lazy"></iframe>
-    <iframe data-page="tasks.html" src="about:blank" class="page" title="tasks" loading="lazy"></iframe>
-    <!-- الرئيسية القديمة محفوظة بس مش بتتحمل أول مرة -->
-    <iframe data-page="home.html" src="about:blank" class="page" title="home" loading="lazy"></iframe>
+    <iframe data-page="home.html" src="home.html" class="page active" title="home"></iframe>
+    <iframe data-page="daily.html" src="about:blank" class="page" title="daily"></iframe>
+    <iframe data-page="attendance.html" src="about:blank" class="page" title="attendance"></iframe>
+    <iframe data-page="tasks.html" src="about:blank" class="page" title="tasks"></iframe>
   </div>
   <nav class="nav">
-    <button class="active" data-page="daily.html" onclick="switchPage('daily.html',this)"><span class="icon">📊</span><span>اليومية</span></button>
-    <button data-page="attendance.html" onclick="switchPage('attendance.html',this)"><span class="icon">⏱️</span><span>الحضور</span></button>
-    <button data-page="tasks.html" onclick="switchPage('tasks.html',this)"><span class="icon">✓</span><span>المهام</span></button>
+    <button class="active" onclick="switchPage('home.html',this)"><span class="icon">🏠</span><span>الرئيسية</span></button>
+    <button onclick="switchPage('daily.html',this)"><span class="icon">📊</span><span>اليومية</span></button>
+    <button onclick="switchPage('attendance.html',this)"><span class="icon">⏱️</span><span>الحضور</span></button>
+    <button onclick="switchPage('tasks.html',this)"><span class="icon">✓</span><span>المهام</span></button>
   </nav>
 </div>
-
-<script src="drive-sync.js" defer></script>
+<script src="drive-sync.js"></script>
 <script>
 const frames=document.querySelectorAll('.page');
-let currentPage='daily.html';
-
-function switchPage(name,btn,push=true){
-  if(currentPage===name) return;
-  currentPage=name;
+function switchPage(name,btn){
   frames.forEach(f=>{
     const is=f.dataset.page===name;
     f.classList.toggle('active',is);
     if(is && f.src.includes('about:blank')){
-      f.src=name+'?v=15';
-      f.onload=()=>{
-        try{
-          const cur=localStorage.getItem('omar_theme')||'teal';
+      f.src=name;
+      f.onload=()=>{ 
+        try{ 
+          const cur=localStorage.getItem('omar_theme')||'green';
           if(f.contentWindow && f.contentWindow.applyTheme) f.contentWindow.applyTheme(cur,false);
         }catch(e){}
       };
     } else if(is){
       try{
-        const cur=localStorage.getItem('omar_theme')||'teal';
+        const cur=localStorage.getItem('omar_theme')||'green';
         if(f.contentWindow && f.contentWindow.applyTheme) f.contentWindow.applyTheme(cur,false);
       }catch(e){}
     }
   });
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  if(push){ try{ history.pushState({page:name}, '', '#'+name); }catch(e){} }
+  btn.classList.add('active');
   if(navigator.vibrate) navigator.vibrate(10);
 }
-
-window.addEventListener('load', ()=>{
-  setTimeout(()=>{
-    const s=document.getElementById('fastSplash');
-    if(s) s.classList.add('hide');
-  }, 80);
-});
-
-window.addEventListener('load', ()=>{
-  if('serviceWorker' in navigator){
-    setTimeout(()=>{
-      navigator.serviceWorker.register('./sw.js?v=15').then(()=>console.log('✅ PWA v15 Fast')).catch(()=>{});
-    }, 800);
-  }
-});
-
-try{
-  history.replaceState({page:'daily.html'}, '', '#daily.html');
-}catch(e){}
-
+applyTheme(localStorage.getItem('omar_theme')||'green');
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(()=>console.log('✅ PWA Ready'));} 
 window.switchPage=switchPage;
-// للوصول للرئيسية القديمة لو احتاجتها: switchPage('home.html')
-window.openHome = ()=>{ 
-  // هتفتح الرئيسية القديمة في نفس الفريم لو احتاجتها
-  const homeFrame = document.querySelector('[data-page="home.html"]');
-  if(homeFrame){
-    homeFrame.src='home.html?v=15';
-    switchPage('home.html', null);
-  }
-};
 </script>
 </body>
 </html>
