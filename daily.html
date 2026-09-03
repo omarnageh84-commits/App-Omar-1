@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>اليومية</title>
 <script src="themes.js"></script>
@@ -100,6 +121,28 @@ td{padding:7px 3px;border-bottom:1px solid var(--bg-soft);text-align:center;font
 .toast.ok{border-color:#16a34a;background:#f0fdf4}.toast.err{border-color:#ef4444;background:#fef2f2}
 @keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 
+
+.row-3{grid-template-columns:1fr 1fr 1fr!important}
+.row-2{grid-template-columns:1fr 1fr!important}
+.row-1{grid-template-columns:1fr!important}
+.highlight-value{background:var(--hero)!important;border-color:var(--hero)!important}
+.highlight-value label{color:#fff!important}
+.highlight-value input{font-size:16px!important;font-weight:900!important;text-align:center!important;background:#fff!important}
+.media-group{flex-direction:column!important;align-items:stretch!important}
+.media-btns{display:flex;gap:4px;margin-top:4px}
+.mbtn{flex:1;padding:6px 4px;border:1px solid var(--card-border);border-radius:8px;background:var(--bg-soft);font-size:8px;font-weight:800;cursor:pointer}
+.card{margin:5vh auto auto auto!important;max-height:85vh!important;max-height:85dvh!important;transform:none!important}
+
+.tsec.total-sec tfoot td{background:#0F766E!important;color:#fff!important;font-weight:900!important;border-top:2px solid #0F766E!important;font-size:9.5px!important}
+
+.row-3{display:grid!important;grid-template-columns:1fr 1fr 1fr!important;gap:4px!important}
+.row-3 .group{width:100%!important;min-height:58px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
+.row-3 .group label{font-size:7px!important;margin-bottom:2px!important}
+.row-3 .group select, .row-3 .group input{font-size:10px!important;padding:6px 4px!important}
+.highlight-value{background:var(--hero)!important;border-color:var(--hero)!important}
+.highlight-value label{color:#fff!important}
+.highlight-value input{background:#fff!important;text-align:center!important;font-weight:900!important;font-size:14px!important}
+
 </style>
 <script src="drive-sync.js"></script>
 <style>html,body{max-width:430px;margin:0 auto!important;background:var(--bg);} body{border-left:1px solid var(--card-border);border-right:1px solid var(--card-border); min-height:100dvh;}
@@ -107,6 +150,28 @@ td{padding:7px 3px;border-bottom:1px solid var(--bg-soft);text-align:center;font
 .toast{display:flex;gap:8px;align-items:center;background:var(--card);border:1.5px solid var(--card-border);border-radius:12px;padding:10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.2);min-width:240px;max-width:340px;pointer-events:auto;animation:toastIn .3s}
 .toast.ok{border-color:#16a34a;background:#f0fdf4}.toast.err{border-color:#ef4444;background:#fef2f2}
 @keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+
+.row-3{grid-template-columns:1fr 1fr 1fr!important}
+.row-2{grid-template-columns:1fr 1fr!important}
+.row-1{grid-template-columns:1fr!important}
+.highlight-value{background:var(--hero)!important;border-color:var(--hero)!important}
+.highlight-value label{color:#fff!important}
+.highlight-value input{font-size:16px!important;font-weight:900!important;text-align:center!important;background:#fff!important}
+.media-group{flex-direction:column!important;align-items:stretch!important}
+.media-btns{display:flex;gap:4px;margin-top:4px}
+.mbtn{flex:1;padding:6px 4px;border:1px solid var(--card-border);border-radius:8px;background:var(--bg-soft);font-size:8px;font-weight:800;cursor:pointer}
+.card{margin:5vh auto auto auto!important;max-height:85vh!important;max-height:85dvh!important;transform:none!important}
+
+.tsec.total-sec tfoot td{background:#0F766E!important;color:#fff!important;font-weight:900!important;border-top:2px solid #0F766E!important;font-size:9.5px!important}
+
+.row-3{display:grid!important;grid-template-columns:1fr 1fr 1fr!important;gap:4px!important}
+.row-3 .group{width:100%!important;min-height:58px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
+.row-3 .group label{font-size:7px!important;margin-bottom:2px!important}
+.row-3 .group select, .row-3 .group input{font-size:10px!important;padding:6px 4px!important}
+.highlight-value{background:var(--hero)!important;border-color:var(--hero)!important}
+.highlight-value label{color:#fff!important}
+.highlight-value input{background:#fff!important;text-align:center!important;font-weight:900!important;font-size:14px!important}
 
 </style>
 </head>
@@ -151,23 +216,53 @@ td{padding:7px 3px;border-bottom:1px solid var(--bg-soft);text-align:center;font
 <button class="card-ttab" id="ct-amanat" onclick="switchCardTab('amanat')">أمانات</button>
 </div>
 <div id="form-expense">
-<div class="group" style="background:var(--hero);border-color:var(--hero)"><label style="color:#fff">قيمة</label><input id="a-amount" type="number" placeholder="0" onfocus="this.select()"></div>
-<div class="row"><div class="group"><label>محفظة</label><select id="a-wallet"></select></div><div class="group"><label>بند</label><select id="a-item" onchange="clearAmountOnBandChange()"></select></div></div>
-<div class="row"><div class="group"><label>تاريخ</label><input id="a-date" type="date"></div><div class="group"><label>ملاحظة</label><input id="a-note"></div></div>
-<div class="group toggle-row" style="background:var(--card);margin-top:4px"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
+  <div class="row row-3">
+    <div class="group"><label>محفظة</label><select id="a-wallet"></select></div>
+    <div class="group highlight-value"><label>قيمة</label><input id="a-amount" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="0" onfocus="this.select()" autofocus></div>
+    <div class="group"><label>بند</label><select id="a-item" onchange="clearAmountOnBandChange()"></select></div>
+  </div>
+  <div class="row row-3">
+    <div class="group"><label>تاريخ</label><input id="a-date" type="date"></div>
+    <div class="group"><label>ملاحظات</label><input id="a-note" placeholder="اختياري"></div>
+    <div class="group"><label>وسائط</label><select id="a-media-type" onchange="handleMediaType(this)"><option value="">بدون</option><option value="image">🖼️ صورة</option><option value="camera">📷 كاميرا</option><option value="voice">🎙️ مسجل صوت</option></select><input type="file" id="mediaFile" accept="image/*" style="display:none" onchange="handleMedia(this)"></div>
+  </div>
+  <div class="row row-3">
+    <div class="group toggle-row" style="grid-column: span 3;"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
+  </div>
+  <div id="mediaPreview" style="display:none;margin-top:4px;font-size:8px"></div>
 </div>
 <div id="form-debt" style="display:none">
-<div class="group" style="background:var(--hero);border-color:var(--hero)"><label style="color:#fff">قيمة</label><input id="a-amount-debt" type="number" placeholder="0" onfocus="this.select()"></div>
-<div class="row"><div class="group"><label>محفظة</label><select id="a-wallet-debt"></select></div><div class="group"><label>نوع</label><select id="a-status"><option value="due">مستحق</option><option value="def">مؤجل</option></select></div></div>
-<div class="row"><div class="group"><label>عليا/ليا</label><select id="a-direction"><option value="عليا">عليا</option><option value="ليا">ليا</option></select></div><div class="group"><label>شخص</label><select id="a-person-debt" onchange="clearAmountOnBandChange()"></select></div></div>
-<div class="row"><div class="group"><label>سحب</label><input id="a-date" type="date"></div><div class="group"><label>سداد</label><input id="a-date-repay" type="date"></div></div>
-<div class="group"><label>ملاحظة</label><input id="a-note-debt"></div>
-<div class="group toggle-row" style="background:var(--card);margin-top:4px"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl-debt" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk-debt" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
+  <div class="row row-3">
+    <div class="group"><label>محفظة</label><select id="a-wallet-debt"></select></div>
+    <div class="group highlight-value"><label>قيمة</label><input id="a-amount-debt" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="0" onfocus="this.select()"></div>
+    <div class="group"><label>النوع</label><select id="a-direction"><option value="عليا">عليا</option><option value="ليا">ليا</option></select></div>
+  </div>
+  <div class="row row-3">
+    <div class="group"><label>الشخص</label><select id="a-person-debt" onchange="clearAmountOnBandChange()"></select></div>
+    <div class="group"><label>حالة</label><select id="a-status"><option value="due">مستحق</option><option value="def">مؤجل</option></select></div>
+    <div class="group"><label>تاريخ السحب</label><input id="a-date-debt" type="date"></div>
+  </div>
+  <div class="row row-3">
+    <div class="group"><label>ملاحظات</label><input id="a-note-debt" placeholder="اختياري"></div>
+    <div class="group"><label>وسائط</label><select class="media-select" onchange="handleMediaType(this)"><option value="">بدون</option><option value="image">🖼️ صورة</option><option value="camera">📷 كاميرا</option><option value="voice">🎙️ مسجل صوت</option></select></div>
+    <div class="group toggle-row"><div style="display:flex;align-items:center;gap:4px"><label>الرصيد</label><span id="a-exclude-lbl-debt" class="switch-label on" style="font-size:7px">يؤثر</span></div><label class="switch"><input id="a-exclude-chk-debt" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
+  </div>
 </div>
 <div id="form-amanat" style="display:none">
-<div class="group" style="background:var(--hero);border-color:var(--hero)"><label style="color:#fff">قيمة</label><input id="a-amount-ama" type="number" placeholder="0" onfocus="this.select()"></div>
-<div class="row"><div class="group"><label>محفظة</label><select id="a-wallet-ama"><option>الأمانات</option></select></div><div class="group"><label>شخص</label><select id="a-person-ama" onchange="clearAmountOnBandChange()"></select></div></div>
-<div class="row"><div class="group"><label>تاريخ</label><input id="a-date-ama" type="date"></div><div class="group"><label>ملاحظة</label><input id="a-note-ama"></div></div>
+  <div class="row row-3">
+    <div class="group"><label>محفظة</label><select id="a-wallet-ama"><option>الأمانات</option></select></div>
+    <div class="group highlight-value"><label>قيمة</label><input id="a-amount-ama" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="0" onfocus="this.select()"></div>
+    <div class="group"><label>النوع</label><select id="a-amanat-type"><option value="إيداع">إيداع ➕</option><option value="سحب">سحب ➖</option></select></div>
+  </div>
+  <div class="row row-3">
+    <div class="group"><label>الشخص</label><select id="a-person-ama" onchange="clearAmountOnBandChange()"></select></div>
+    <div class="group"><label>التاريخ</label><input id="a-date-ama" type="date"></div>
+    <div class="group"><label>وسائط</label><select class="media-select" onchange="handleMediaType(this)"><option value="">بدون</option><option value="image">🖼️ صورة</option><option value="camera">📷 كاميرا</option><option value="voice">🎙️ مسجل صوت</option></select></div>
+  </div>
+  <div class="row row-3">
+    <div class="group"><label>ملاحظات</label><input id="a-note-ama" placeholder="اختياري"></div>
+    <div class="group toggle-row" style="grid-column: span 2;"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl-ama" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk-ama" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
+  </div>
 </div>
 <div class="card-actions">
 <button onclick="closeAdd()" style="flex:1;padding:8px;background:var(--bg-soft);border:1px solid var(--card-border);border-radius:8px;font-weight:800;font-size:9.3px;color:var(--text)">إلغاء</button>
@@ -359,233 +454,4 @@ function renderTotal(){
     if(sec.isWallet){
       let walletNames=wallets.filter(w=>w!=='الأمانات');
       if(q) walletNames=walletNames.filter(n=>n.includes(q));
-      const monthFiltered=transactions.filter(t=>t.date&&t.date.startsWith(curYM)&&walletNames.includes(t.wallet));
-      const monthLabel=`${curYM.slice(5,7)}-${curYM.slice(0,4)}`;
-      const monthSum=monthFiltered.reduce((a,b)=>a+(Number(b.amount)||0),0);
-      html+=`<div class="total-header"><span></span><span style="font-size:12px;font-weight:900">${monthSum.toLocaleString()}</span><b>${sec.title} (${monthLabel})</b></div>`;
-      if(!walletNames.length){ html+=`<div style="padding:10px;text-align:center;color:var(--text-soft);background:var(--card);border:1px solid var(--card-border);border-radius:8px;margin-bottom:10px">فاضي</div>`; return; }
-      html+=`<div class="tsec total-sec"><div class="twrap"><table><thead><tr><th style="min-width:80px">بند</th>${months.map(m=>`<th>${m}</th>`).join('')}<th>إجمالي</th></tr></thead><tbody>`;
-      walletNames.forEach(wName=>{
-        const items=transactions.filter(t=>t.wallet===wName);
-        const perMonth=Array(12).fill(0);
-        items.forEach(t=>{const d=new Date(t.date); if(!isNaN(d)) perMonth[d.getMonth()]+=(Number(t.amount)||0);});
-        const total=perMonth.reduce((a,c)=>a+c,0);
-        html+=`<tr><td style="font-weight:900">${wName}</td>${perMonth.map(v=>`<td>${v?v.toLocaleString():'-'}</td>`).join('')}<td style="font-weight:900;color:var(--hero)">${total.toLocaleString()}</td></tr>`;
-      });
-      html+=`</tbody></table></div></div>`;
-      return;
-    }
-    // For all other sections, build bands from masterBands + transactions
-    let bands=masterBands.filter(b=>b.section===sec.key);
-    const existNames=new Set(bands.map(b=>b.name));
-    // Auto-add from transactions
-    transactions.filter(sec.filter).forEach(t=>{
-      const nm=(t.person||t.item||'').trim();
-      if(nm && !existNames.has(nm)){
-        masterBands.push({id:Date.now()+Math.random()*1000,name:nm,section:sec.key});
-        existNames.add(nm);
-        bands.push({name:nm,section:sec.key});
-      }
-    });
-    if(q) bands=bands.filter(b=>b.name.includes(q));
-    let list=transactions.filter(sec.filter);
-    const monthFiltered=list.filter(t=>t.date&&t.date.startsWith(curYM));
-    const monthLabel=`${curYM.slice(5,7)}-${curYM.slice(0,4)}`;
-    const monthSum=monthFiltered.reduce((a,b)=>a+(Number(b.amount)||0),0);
-    html+=`<div class="total-header"><button class="add-row-btn" onclick="addNewRow('${sec.key}')">+ بند</button><span style="font-size:12px;font-weight:900">${monthSum.toLocaleString()}</span><b>${sec.title} (${monthLabel})</b></div>`;
-    if(!bands.length){
-      // Still show empty table structure for the 3 requested tables so they are visible
-      html+=`<div class="tsec total-sec"><div class="twrap"><table><thead><tr><th style="min-width:80px">بند</th>${months.map(m=>`<th>${m}</th>`).join('')}<th>إجمالي</th></tr></thead><tbody><tr><td colspan="${months.length+2}" style="padding:10px;color:var(--text-soft)">فاضي - دوس + بند</td></tr></tbody></table></div></div>`;
-      return;
-    }
-    html+=`<div class="tsec total-sec"><div class="twrap"><table><thead><tr><th style="min-width:80px">بند</th>${months.map(m=>`<th>${m}</th>`).join('')}<th>إجمالي</th></tr></thead><tbody>`;
-    bands.forEach(b=>{
-      const band=b.name;
-      const items=list.filter(t=> (t.item===band || t.person===band) );
-      const perMonth=Array(12).fill(0);
-      items.forEach(t=>{const d=new Date(t.date); if(!isNaN(d)) perMonth[d.getMonth()]+=(Number(t.amount)||0);});
-      const total=perMonth.reduce((a,c)=>a+c,0);
-      html+=`<tr><td onclick="openBandMenu('${band.replace(/'/g,"\'")}','${sec.key}')" style="cursor:pointer;font-weight:900">${band}</td>${perMonth.map(v=>`<td>${v?v.toLocaleString():'-'}</td>`).join('')}<td style="font-weight:900;color:var(--hero)">${total.toLocaleString()}</td></tr>`;
-    });
-    html+=`</tbody></table></div></div>`;
-  });
-  let el=document.getElementById('t-total');
-  if(el) el.innerHTML=html;
-}
-
-
-
-
-function openBandMenu(band,section){currentBand=band;currentSection=section;document.getElementById('bandMenuTitle').textContent=band;document.getElementById('bandMenu').classList.add('open')}
-function closeBandMenu(){document.getElementById('bandMenu').classList.remove('open')}
-function handleBandAction(action){closeBandMenu();if(action==='edit'){showPrompt(`تعديل ${currentBand}`,currentBand,(newName)=>{if(!newName||newName===currentBand)return;masterBands.forEach(b=>{if(b.name===currentBand&&b.section===currentSection)b.name=newName});transactions.forEach(t=>{if(t.item===currentBand)t.item=newName;if(t.person===currentBand)t.person=newName});persist();renderTotal();if(curTab!=='total'){if(curTab==='debt')renderDebt();else renderSimple(curTab)}})}else if(action==='delete'){showConfirm(`مسح ${currentBand}؟`,()=>{masterBands=masterBands.filter(b=>!(b.name===currentBand&&b.section===currentSection));transactions=transactions.filter(t=>!(t.item===currentBand||t.person===currentBand));persist();renderTotal();if(curTab!=='total'){if(curTab==='debt')renderDebt();else renderSimple(curTab)}},true)}}
-function addNewRow(section){currentSection=section;const dialog=document.getElementById('customPrompt');dialog.innerHTML=`<div class="dialog-box"><h4>إضافة بند جديد</h4><input id="newBandName" placeholder="اسم البند"><div class="dialog-actions"><button class="btn-cancel" onclick="closePrompt(); restoreDialog()">إلغاء</button><button class="btn-confirm" onclick="confirmNewRow()">إضافة</button></div></div>`;dialog.classList.add('open');setTimeout(()=>document.getElementById('newBandName').focus(),100)}
-function confirmNewRow(){const name=document.getElementById('newBandName').value.trim();if(!name)return;if(masterBands.find(b=>b.name===name&&b.section===currentSection)){toast('البند موجود بالفعل','err');return}masterBands.push({id:Date.now(),name,section:currentSection});persist();closePrompt();restoreDialog();renderTotal()}
-function restoreDialog(){document.getElementById('customPrompt').innerHTML=`<div class="dialog-box" id="dialogInner"><h4 id="promptTitle"></h4><input id="promptInput" type="text"><div class="dialog-actions"><button class="btn-cancel" onclick="closePrompt()">إلغاء</button><button class="btn-confirm" id="promptConfirmBtn" onclick="confirmPrompt()">حسناً</button></div></div>`}
-function showPrompt(title,def,cb){restoreDialog();document.getElementById('promptTitle').textContent=title;const inp=document.getElementById('promptInput');inp.value=def;inp.style.display='block';document.getElementById('promptConfirmBtn').textContent='حسناً';document.getElementById('promptConfirmBtn').className='btn-confirm';promptCallback=cb;document.getElementById('customPrompt').classList.add('open');setTimeout(()=>{inp.focus();inp.select()},100)}
-function showConfirm(title,cb,isDanger=false){restoreDialog();document.getElementById('promptTitle').textContent=title;document.getElementById('promptInput').style.display='none';const btn=document.getElementById('promptConfirmBtn');btn.textContent='مسح';btn.className=isDanger?'btn-danger':'btn-confirm';promptCallback=()=>{restoreDialog();cb()};document.getElementById('customPrompt').classList.add('open')}
-function closePrompt(){document.getElementById('customPrompt').classList.remove('open');promptCallback=null}
-function confirmPrompt(){const inp=document.getElementById('promptInput');if(promptCallback)promptCallback(inp.value||'');closePrompt()}
-function confirmDeleteDaily(id){showConfirm('مسح الحركة دي؟',()=>{transactions=transactions.filter(t=>t.id!==id);persist();if(curTab==='debt')renderDebt();else if(curTab==='total')renderTotal();else renderSimple(curTab);renderTotal()},true)}
-function deleteTx(){if(!editingId)return;showConfirm('مسح الحركة نهائيا؟',()=>{transactions=transactions.filter(t=>t.id!==editingId);persist();closeAdd();if(curTab==='debt')renderDebt();else if(curTab==='total')renderTotal();else renderSimple(curTab);renderTotal()},true)}
-
-function clearAmountOnBandChange(){
-  try{
-    let amt=document.getElementById(cardTab==='debt'?'a-amount-debt':cardTab==='amanat'?'a-amount-ama':'a-amount');
-    if(amt && !editingId){ amt.value=''; amt.focus(); amt.select(); }
-  }catch(e){}
-}
-function selectAllValue(el){ try{ el.select(); }catch(e){} }
-
-function openAdd(){
-  editingId=null;
-  excludeFromBalanceCurrent=false;
-  try{updateExcludeBtn()}catch(e){}
-  cardTab=curTab==='total'?'expense':curTab;
-  switchCardTab(cardTab);
-  let delBtn=document.getElementById('btnDelete');
-  if(delBtn) delBtn.style.display='none';
-  const todayISO=new Date().toISOString().slice(0,10);
-  ['a-amount','a-amount-debt','a-amount-ama'].forEach(id=>{let el=document.getElementById(id); if(el) el.value='';});
-  ['a-note','a-note-debt','a-note-ama'].forEach(id=>{let el=document.getElementById(id); if(el) el.value='';});
-  const setIfExists=(id,val)=>{const el=document.getElementById(id); if(el){el.value=val}};
-  setIfExists('a-date',todayISO);
-  setIfExists('a-date-ama',todayISO);
-  document.getElementById('addModal').classList.add('open');
-  // FIX: مصروفات مظبوط، دخل/ديون/أمانات ننزلهم جامد لتحت (كانوا مرفوعين زيادة)
-  setTimeout(()=>{
-    let card=document.querySelector('#addModal .card') || document.querySelector('#addModal > div') || document.querySelector('.card');
-    if(card){
-      if(cardTab==='expense'){
-        // مصروفات - مظبوط
-        card.style.transform='translateY(-2vh)';
-        card.style.marginTop='12vh';
-      } else {
-        // دخل وديون وأمانات - ننزلهم جامد لتحت
-        card.style.transform='translateY(12vh)';
-        card.style.marginTop='28vh';
-      }
-    }
-    let el=document.getElementById(cardTab==='debt'?'a-amount-debt':cardTab==='amanat'?'a-amount-ama':'a-amount');
-    if(el){ el.focus(); try{el.select();}catch(e){} }
-  },110);
-}
-
-
-function closeAdd(){let card=document.querySelector('.card'); if(card){card.style.transform=''; card.style.marginTop='';} document.getElementById('addModal').classList.remove('open');editingId=null}
-function saveTx(){
-let type=cardTab;let item,person,wallet,amount,date,note,direction,status;
-if(type==='expense'||type==='income'){
-  item=document.getElementById('a-item').value;
-  wallet=document.getElementById('a-wallet').value;
-  amount=document.getElementById('a-amount').value;
-  date=document.getElementById('a-date').value;
-  note=document.getElementById('a-note').value;
-  if(item==='__new__'){
-    showPrompt('اسم البند الجديد (مثال: مرتب)', '', (newName)=>{
-      if(!newName) return;
-      newName=newName.trim();
-      if(!newName) return;
-      let sec=type==='income'?'income':'expense';
-      if(masterBands.find(b=>b.name===newName && b.section===sec)){ toast('البند موجود بالفعل','err'); return; }
-      masterBands.push({id:Date.now(),name:newName,section:sec});
-      document.getElementById('a-item').innerHTML=getBands(sec).map(b=>`<option>${b}</option>`).join('')+'<option value="__new__">+ جديد</option>';
-      document.getElementById('a-item').value=newName;
-      persist();
-      setTimeout(()=>saveTx(),200);
-    });
-    return;
-  }
-  person=item;
-}else if(type==='debt'){
-  item=document.getElementById('a-person-debt').value;
-  person=item;
-  wallet=document.getElementById('a-wallet-debt').value;
-  amount=document.getElementById('a-amount-debt').value;
-  date=document.getElementById('a-date').value;
-  note=document.getElementById('a-note-debt').value;
-  direction=document.getElementById('a-direction').value;
-  status=document.getElementById('a-status').value;
-  if(item==='__new__'){
-    showPrompt('اسم الشخص الجديد', '', (newName)=>{
-      if(!newName) return;
-      newName=newName.trim();
-      if(!newName) return;
-      let sec=status==='due'?'debt_due':'debt_def';
-      if(masterBands.find(b=>b.name===newName && b.section===sec)){ toast('موجود بالفعل','err'); return; }
-      masterBands.push({id:Date.now(),name:newName,section:sec});
-      let all=[...getBands('debt_due'),...getBands('debt_def')];
-      document.getElementById('a-person-debt').innerHTML=all.map(b=>`<option>${b}</option>`).join('')+'<option value="__new__">+ جديد</option>';
-      document.getElementById('a-person-debt').value=newName;
-      persist();
-      setTimeout(()=>saveTx(),200);
-    });
-    return;
-  }
-}else if(type==='amanat'){
-  item=document.getElementById('a-person-ama').value;
-  person=item;
-  wallet='الأمانات';
-  amount=document.getElementById('a-amount-ama').value;
-  date=document.getElementById('a-date-ama').value;
-  note=document.getElementById('a-note-ama').value;
-  if(item==='__new__'){
-    showPrompt('اسم الشخص الجديد', '', (newName)=>{
-      if(!newName) return;
-      newName=newName.trim();
-      if(!newName) return;
-      if(masterBands.find(b=>b.name===newName && b.section==='amanat')){ toast('موجود','err'); return; }
-      masterBands.push({id:Date.now(),name:newName,section:'amanat'});
-      document.getElementById('a-person-ama').innerHTML=getBands('amanat').map(b=>`<option>${b}</option>`).join('')+'<option value="__new__">+ جديد</option>';
-      document.getElementById('a-person-ama').value=newName;
-      persist();
-      setTimeout(()=>saveTx(),200);
-    });
-    return;
-  }
-}
-if(!amount||Number(amount)===0){toast('اكتب القيمة أولاً','err');return}
-const payload={id:editingId||Date.now().toString(),type:type,subType:type==='debt'?(status==='due'?'debt_due':'debt_def'):type,item,person,wallet,amount:Number(amount)||0,date:date||new Date().toISOString().slice(0,10),note,direction:direction||'عليا',status:status||'',excludeFromBalance:excludeFromBalanceCurrent};
-if(editingId){const idx=transactions.findIndex(t=>t.id===editingId);if(idx>=0)transactions[idx]={...transactions[idx],...payload}}else transactions.push(payload);
-persist();closeAdd();refreshCurrent();renderTotal();
-toast('تم الحفظ ✅','ok');
-}
-
-(function init(){try{let e=document.getElementById('today');if(e)e.textContent=new Date().toLocaleDateString('ar-EG');}catch(e){}try{ensureMaster();}catch(e){}try{if(!transactions||!transactions.length){transactions=[{id:'1',type:'expense',item:'الإيجار',person:'الإيجار',amount:1000,date:'2026-08-15',wallet:'كاش'}];persist();}}catch(e){}try{updateMonthLabels();}catch(e){}try{applyMonthToInputs();}catch(e){}try{switchTab('expense');}catch(e){console.error(e);try{renderFixedSection();renderStats('expense');renderSimple('expense');renderTotal();}catch(e2){}}})();
-</script>
-
-<script>
-// Quick actions from shortcuts / notifications - Omar V19
-(function(){
-  function handleQA(action){
-    if(!action) return;
-    if(action==='expense' || action==='مصروف'){
-      try{ if(typeof openAdd==='function'){ openAdd(); switchCardTab('expense'); } }catch(e){}
-    }
-    if(action==='income'){
-      try{ if(typeof openAdd==='function'){ openAdd(); switchCardTab('income'); } }catch(e){}
-    }
-  }
-  window.addEventListener('message', function(e){
-    if(e.data && e.data.type==='quickAction'){
-      setTimeout(()=>handleQA(e.data.action), 400);
-    }
-  });
-  // Check URL param action
-  try{
-    const params = new URLSearchParams(location.search);
-    const act = params.get('action');
-    if(act){
-      setTimeout(()=>handleQA(act), 800);
-    }
-  }catch(e){}
-  // Check hash inside iframe too
-  try{
-    const hash = (location.hash||'').replace('#','');
-    if(hash==='expense') setTimeout(()=>handleQA('expense'), 800);
-  }catch(e){}
-})();
-</script>
-
-</body>
-</html>
+      const monthFiltered=transactions.filte
