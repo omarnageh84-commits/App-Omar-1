@@ -903,5 +903,77 @@ if('Notification' in window && Notification.permission==='default'){Notification
 setInterval(checkReminders,30000);
 renderManagerLists();render();checkReminders();
 </script>
+
+<script>
+// Back button handling inside iframe - Omar
+(function(){
+  let modalOpen=false;
+  function pushModalState(){
+    try{
+      history.pushState({modal:true}, '', '#modal');
+      if(window.parent) window.parent.postMessage({type:'pushState', state:{modal:true}, url:location.href}, '*');
+      modalOpen=true;
+    }catch(e){}
+  }
+  function closeModalOnBack(){
+    // Try to close any open modal
+    const addModal=document.getElementById('addModal');
+    if(addModal && addModal.classList.contains('open')){
+      if(typeof closeAdd==='function') closeAdd();
+      else addModal.classList.remove('open');
+      modalOpen=false;
+      return true;
+    }
+    const fabModal=document.getElementById('fabModal');
+    if(fabModal && fabModal.classList.contains('open')){
+      if(typeof closeFab==='function') closeFab();
+      else fabModal.classList.remove('open');
+      modalOpen=false;
+      return true;
+    }
+    // For tasks page
+    const taskDetail=document.getElementById('taskDetailModal')||document.getElementById('taskModal');
+    if(taskDetail && (taskDetail.style.display==='flex' || taskDetail.classList.contains('open'))){
+      if(typeof closeTaskModal==='function') closeTaskModal();
+      else if(typeof closeModal==='function') closeModal();
+      else { taskDetail.style.display='none'; taskDetail.classList.remove('open'); }
+      modalOpen=false;
+      return true;
+    }
+    return false;
+  }
+
+  // Override open functions to push state
+  const originalOpenAdd=window.openAdd;
+  if(originalOpenAdd){
+    window.openAdd=function(){
+      const result=originalOpenAdd.apply(this, arguments);
+      pushModalState();
+      return result;
+    };
+  }
+  const originalOpenFab=window.openFab;
+  if(originalOpenFab){
+    window.openFab=function(){
+      const result=originalOpenFab.apply(this, arguments);
+      pushModalState();
+      return result;
+    };
+  }
+
+  window.addEventListener('popstate', function(e){
+    if(modalOpen){
+      if(closeModalOnBack()){
+        // Prevent going back further
+        try{ history.pushState({page:'stay'}, '', location.href); }catch(err){}
+      }
+    }
+  });
+
+  // Initial state
+  try{ history.replaceState({page:'main'}, '', location.href); }catch(e){}
+})();
+</script>
+
 </body>
 </html>
