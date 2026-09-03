@@ -1,10 +1,10 @@
 {
   "name": "App-Omar",
   "short_name": "App-Omar",
-  "start_url": "./index.html?v=18",
+  "start_url": "./index.html?v=20",
   "display": "standalone",
-  "background_color": "#F0FDFA",
-  "theme_color": "#0F766E",
+  "background_color": "#F0FDF4",
+  "theme_color": "#16A34A",
   "orientation": "portrait",
   "lang": "ar",
   "dir": "rtl",
@@ -20,6 +20,56 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "💸 مصروف جديد",
+      "short_name": "مصروف",
+      "description": "إضافة مصروف سريع",
+      "url": "./index.html?v=20#daily/expense",
+      "icons": [
+        {
+          "src": "icon_192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "✓ مهمة جديدة",
+      "short_name": "مهمة",
+      "description": "إضافة مهمة سريعة",
+      "url": "./index.html?v=20#tasks/new",
+      "icons": [
+        {
+          "src": "icon_192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "⏱️ تسجيل حضور",
+      "short_name": "حضور",
+      "description": "تسجيل حضور اليوم",
+      "url": "./index.html?v=20#attendance/today",
+      "icons": [
+        {
+          "src": "icon_192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "📊 اليومية",
+      "short_name": "اليومية",
+      "description": "فتح اليومية مباشرة",
+      "url": "./index.html?v=20#daily",
+      "icons": [
+        {
+          "src": "icon_192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

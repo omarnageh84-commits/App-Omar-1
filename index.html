@@ -3,57 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<link rel="manifest" href="manifest.json?v=18">
+<link rel="manifest" href="manifest.json?v=20">
 <meta name="theme-color" content="#0F766E">
 <title>App-Omar</title>
 <style>
-:root{--bg:#F0FDFA;--card:#FFFFFF;--card-border:#5EEAD4;--text:#134E4A;--text-soft:#0D9488;--hero:#0F766E;--nav-bg:#FFFFFF}
+:root{--bg:#F0FDF4;--card:#FFFFFF;--card-border:#5EEAD4;--text:#134E4A;--text-soft:#0D9488;--hero:#16A34A;--nav-bg:#FFFFFF}
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Tajawal,sans-serif}
 html,body{height:100%;background:#F0FDFA;overflow:hidden}
 body{display:flex;justify-content:center;background:var(--bg)}
 .phone{width:100%;max-width:430px;height:100dvh;background:var(--bg);display:flex;flex-direction:column;position:relative}
 .wrap{flex:1;position:relative;overflow:hidden;background:var(--bg)}
-.page{position:absolute;inset:0;width:100%;height:100%;border:0;opacity:0;pointer-events:none;transform:translateX(10px);transition:opacity .18s,transform .18s;background:var(--bg)}
+.page{position:absolute;inset:0;width:100%;height:100%;border:0;opacity:0;pointer-events:none;transform:translateX(12px);transition:opacity .18s,transform .18s;background:var(--bg)}
 .page.active{opacity:1;pointer-events:auto;transform:translateX(0);z-index:2}
-.nav{height:62px;margin:0;border-top:1.5px solid var(--card-border);background:var(--nav-bg);display:flex;padding:4px;gap:4px}
+.nav{height:62px;border-top:1.5px solid var(--card-border);background:var(--nav-bg);display:flex;padding:4px;gap:4px}
 .nav button{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:12px;color:var(--text-soft);font-size:10px;font-weight:700;cursor:pointer}
 .nav button.active{background:var(--hero);color:#fff}
 .nav b{font-size:18px}
+#quick{position:absolute;top:8px;left:8px;z-index:10;display:flex;gap:6px}
+#quick button{background:var(--card);border:1.5px solid var(--card-border);border-radius:20px;padding:6px 10px;font-size:9px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 </style>
 </head>
 <body>
 <div class="phone">
   <div class="wrap" id="wrap">
-    <iframe data-p="daily.html" src="daily.html?v=18" class="page active" title="daily"></iframe>
+    <iframe data-p="daily.html" src="daily.html?v=20" class="page active" title="daily"></iframe>
     <iframe data-p="attendance.html" src="about:blank" class="page" title="attendance"></iframe>
     <iframe data-p="tasks.html" src="about:blank" class="page" title="tasks"></iframe>
   </div>
   <nav class="nav">
-    <button class="active" onclick="go('daily.html',0)"><b>📊</b><span>اليومية</span></button>
-    <button onclick="go('attendance.html',1)"><b>⏱️</b><span>الحضور</span></button>
-    <button onclick="go('tasks.html',2)"><b>✓</b><span>المهام</span></button>
+    <button class="active" id="btn-daily" onclick="go('daily.html',0)"><b>📊</b><span>اليومية</span></button>
+    <button id="btn-att" onclick="go('attendance.html',1)"><b>⏱️</b><span>الحضور</span></button>
+    <button id="btn-tasks" onclick="go('tasks.html',2)"><b>✓</b><span>المهام</span></button>
   </nav>
+<!-- theme dots kept but hidden to keep green fixed - uncomment if you want them -->
 </div>
 <script>
 let cur=0;
 const pages=document.querySelectorAll('.page');
-function go(name,idx){
-  if(cur===idx) return;
-  // تحريك يمين/شمال
-  const dir = idx>cur ? 1 : -1;
+const map=['daily.html','attendance.html','tasks.html'];
+
+function go(name,idx,action){
+  if(idx===undefined) idx=map.indexOf(name);
+  cur=idx;
   pages.forEach(p=>{
     const is=p.dataset.p===name;
     if(is){
-      if(p.src.includes('about:blank')) p.src=name+'?v=18';
+      let src=name+'?v=20';
+      if(action) src+='&action='+action;
+      if(p.src.includes('about:blank') || action){
+        p.src=src;
+      }
       p.classList.add('active');
+      // لو فيه action ابعته للـ iframe بعد ما يحمل
+      if(action){
+        p.onload=()=>{
+          try{ p.contentWindow.postMessage({type:'quickAction', action:action}, '*'); }catch(e){}
+        };
+      }
     } else {
       p.classList.remove('active');
     }
   });
   document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('active',i===idx));
-  cur=idx;
-  if(navigator.vibrate) navigator.vibrate(8);
 }
+
+function handleHash(){
+  const h=(location.hash||'#daily').replace('#','');
+  const [page,act]=h.split('/');
+  if(page==='daily') go('daily.html',0,act);
+  else if(page==='attendance') go('attendance.html',1,act||'today');
+  else if(page==='tasks') go('tasks.html',2,act||'new');
+  else if(page==='expense') go('daily.html',0,'expense');
+  else go('daily.html',0);
+}
+
 // سحب يمين/شمال
 let sx=0;
 const wrap=document.getElementById('wrap');
@@ -61,11 +84,20 @@ wrap.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
 wrap.addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX - sx;
   if(Math.abs(dx)<60) return;
-  if(dx<0 && cur<2) go(['daily.html','attendance.html','tasks.html'][cur+1],cur+1);
-  if(dx>0 && cur>0) go(['daily.html','attendance.html','tasks.html'][cur-1],cur-1);
+  if(dx<0 && cur<2) go(map[cur+1],cur+1);
+  if(dx>0 && cur>0) go(map[cur-1],cur-1);
 },{passive:true});
 
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js?v=18').catch(()=>{}); }
+window.addEventListener('hashchange', handleHash);
+window.addEventListener('load', ()=>{
+  handleHash();
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js?v=20').catch(()=>{}); }
+  // طلب إذن الإشعارات للاختصارات الخارجية
+  if('Notification' in window && Notification.permission==='default'){
+    // لا نطلب تلقائيا عشان ما يزعجش، هنطلبه لما يدوس على زر
+  }
+});
+
 window.go=go;
 </script>
 </body>

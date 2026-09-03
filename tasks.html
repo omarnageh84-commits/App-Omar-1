@@ -975,5 +975,28 @@ renderManagerLists();render();checkReminders();
 })();
 </script>
 
+
+<script>
+// Quick actions for tasks V19
+(function(){
+  function handleQA(action){
+    if(!action) return;
+    if(action==='new' || action==='مهمة'){
+      try{ if(typeof openModal==='function') openModal(); else if(typeof openAdd==='function') openAdd(); }catch(e){}
+    }
+  }
+  window.addEventListener('message', function(e){
+    if(e.data && e.data.type==='quickAction'){
+      setTimeout(()=>handleQA(e.data.action), 400);
+    }
+  });
+  try{
+    const params = new URLSearchParams(location.search);
+    const act = params.get('action');
+    if(act) setTimeout(()=>handleQA(act), 800);
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>
