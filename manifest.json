@@ -1,6 +1,6 @@
 {
-  "name": "App-Omar - نظام عمر",
-  "short_name": "App-Omar",
+  "name": "Omar - عمر",
+  "short_name": "Omar",
   "description": "نظام إدارة يومية وحضور ومهام عربي RTL",
   "start_url": "./index.html?v=15",
   "display": "standalone",
