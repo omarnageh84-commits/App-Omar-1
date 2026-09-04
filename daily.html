@@ -253,8 +253,10 @@ td{padding:7px 3px;border-bottom:1px solid var(--bg-soft);text-align:center;font
     <div class="group"><label>تاريخ</label><input id="a-date" type="date"></div>
     <div class="group"><label>ملاحظات</label><input id="a-note" placeholder="اختياري"></div>
   </div>
-  <div class="group"><label>وسائط</label><select id="a-media-type" onchange="handleMediaType(this)"><option value="">بدون</option><option value="image">🖼️ صورة</option><option value="camera">📷 كاميرا</option><option value="voice">🎙️ مسجل صوت</option></select><input type="file" id="mediaFile" accept="image/*" style="display:none" onchange="handleMedia(this)"><div id="mediaPreview" style="display:none;margin-top:4px;font-size:8px"></div></div>
-  <div class="group toggle-row"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
+  <div class="row row-2">
+    <div class="group"><label>وسائط</label><select id="a-media-type" onchange="handleMediaType(this)"><option value="">بدون</option><option value="image">🖼️ صورة</option><option value="camera">📷 كاميرا</option><option value="voice">🎙️ مسجل صوت</option></select><input type="file" id="mediaFile" accept="image/*" style="display:none" onchange="handleMedia(this)"><div id="mediaPreview" style="display:none;margin-top:4px;font-size:8px"></div></div>
+    <div class="group toggle-row"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
+  </div>
 </div>
 <div id="form-debt" style="display:none">
   <div class="row row-3">
@@ -262,18 +264,16 @@ td{padding:7px 3px;border-bottom:1px solid var(--bg-soft);text-align:center;font
     <div class="group highlight-value"><label>قيمة</label><input id="a-amount-debt" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="0" onfocus="this.select()"></div>
     <div class="group"><label>النوع</label><select id="a-direction"><option value="عليا">عليا</option><option value="ليا">ليا</option></select></div>
   </div>
-  <div class="row row-2">
+  <div class="row row-3">
     <div class="group"><label>الشخص</label><select id="a-person-debt" onchange="clearAmountOnBandChange()"></select></div>
     <div class="group"><label>حالة</label><select id="a-status"><option value="due">مستحق</option><option value="def">مؤجل</option></select></div>
-  </div>
-  <div class="row row-1">
     <div class="group"><label>تاريخ السحب</label><input id="a-date-debt" type="date"></div>
   </div>
-  <div class="row row-1">
+  <div class="row row-3">
     <div class="group"><label>ملاحظات</label><input id="a-note-debt" placeholder="اختياري"></div>
+    <div class="group"><label>وسائط</label><select class="media-select" onchange="handleMediaType(this)"><option value="">بدون</option><option value="image">🖼️ صورة</option><option value="camera">📷 كاميرا</option><option value="voice">🎙️ مسجل صوت</option></select></div>
+    <div class="group toggle-row"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl-debt" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk-debt" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
   </div>
-  <div class="group"><label>وسائط</label><select class="media-select" onchange="handleMediaType(this)"><option value="">بدون</option><option value="image">🖼️ صورة</option><option value="camera">📷 كاميرا</option><option value="voice">🎙️ مسجل صوت</option></select></div>
-  <div class="group toggle-row"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl-debt" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk-debt" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
 </div>
 <div id="form-amanat" style="display:none">
   <div class="row row-3">
@@ -281,17 +281,15 @@ td{padding:7px 3px;border-bottom:1px solid var(--bg-soft);text-align:center;font
     <div class="group highlight-value"><label>قيمة</label><input id="a-amount-ama" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="0" onfocus="this.select()"></div>
     <div class="group"><label>النوع</label><select id="a-amanat-type"><option value="إيداع">إيداع ➕</option><option value="سحب">سحب ➖</option></select></div>
   </div>
-  <div class="row row-1">
+  <div class="row row-2">
     <div class="group"><label>الشخص</label><select id="a-person-ama" onchange="clearAmountOnBandChange()"></select></div>
-  </div>
-  <div class="row row-1">
     <div class="group"><label>التاريخ</label><input id="a-date-ama" type="date"></div>
   </div>
-  <div class="row row-1">
+  <div class="row row-3">
     <div class="group"><label>ملاحظات</label><input id="a-note-ama" placeholder="اختياري"></div>
+    <div class="group"><label>وسائط</label><select class="media-select" onchange="handleMediaType(this)"><option value="">بدون</option><option value="image">🖼️ صورة</option><option value="camera">📷 كاميرا</option><option value="voice">🎙️ مسجل صوت</option></select></div>
+    <div class="group toggle-row"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl-ama" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk-ama" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
   </div>
-  <div class="group"><label>وسائط</label><select class="media-select" onchange="handleMediaType(this)"><option value="">بدون</option><option value="image">🖼️ صورة</option><option value="camera">📷 كاميرا</option><option value="voice">🎙️ مسجل صوت</option></select></div>
-  <div class="group toggle-row"><div style="display:flex;align-items:center;gap:6px"><label>الرصيد</label><span id="a-exclude-lbl-ama" class="switch-label on">يؤثر على الرصيد</span></div><label class="switch"><input id="a-exclude-chk-ama" type="checkbox" onchange="toggleExclude()"><span class="slider"></span></label></div>
 </div>
 <div class="card-actions">
 <button onclick="closeAdd()" style="flex:1;padding:8px;background:var(--bg-soft);border:1px solid var(--card-border);border-radius:8px;font-weight:800;font-size:9.3px;color:var(--text)">إلغاء</button>
@@ -548,7 +546,7 @@ function clearAllFilters(){
 let curYear = new Date().getFullYear();
 function shiftYear(dir){ curYear+=dir; document.getElementById('ml-yearly').textContent=curYear; renderYearly(); }
 function refreshCurrent(){
-  if(curTab==='expense') renderSimple('expense');
+  if(curTab==='expense'){ try{ renderFixedSection(); }catch(e){} renderSimple('expense'); }
   else if(curTab==='income') renderSimple('income');
   else if(curTab==='debt') renderDebt();
   else if(curTab==='amanat') renderSimple('amanat');
