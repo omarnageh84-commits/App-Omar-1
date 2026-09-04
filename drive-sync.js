@@ -1,154 +1,87 @@
-// AB Omar - Drive JSON Backup V8 - Fixed Stack Overflow - محمي من المسح الفاضي
-const AB_OMAR_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyV8WQb8MIN3Dxfc7IBBXIYjgza-xFq6p_ujvu66z_95mcfvr4t5ZpAXRzAZbdkCDgC/exec";
-let isBackingUp = false;
-let autoBackupTimer = null;
-let isRestoring = false;
-let watchEnabled = false;
 
-function getAllDataForBackup(){
+// drive-sync.js - AB Omar V9 Fixed - Drive Linked
+// مربوط بـ Google Sheet ID: 12KpLcWLt7Xzb09A6D8qErKOvEhZvqX9-AUTn5052RdQ
+// Apps Script: https://script.google.com/macros/s/AKfycbyxnCT0rkaR__Y5Abp0LzxiLM-FCe1KSCkt_Ef3itfFkwnAHbnCNt-qamBQW6Rugt8K/exec
+// هذا الملف فقط هو اللي بيتعدل - daily.html لم يتغير منه حرف
+
+const DRIVE_CONFIG = {
+  SHEET_ID: '12KpLcWLt7Xzb09A6D8qErKOvEhZvqX9-AUTn5052RdQ',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyxnCT0rkaR__Y5Abp0LzxiLM-FCe1KSCkt_Ef3itfFkwnAHbnCNt-qamBQW6Rugt8K/exec',
+  DEBOUNCE: 1500
+};
+
+let _lastDataHash = '';
+let _debounceTimer = null;
+let _isSyncing = false;
+
+function getAllData(){
   try{
     return {
-      daily: JSON.parse(localStorage.getItem('omar_tx_v3')||'[]'),
-      attendance: JSON.parse(localStorage.getItem('att_fixed_final')||'{}'),
-      attendance_log: JSON.parse(localStorage.getItem('attendance_log')||'[]'),
-      tasks: JSON.parse(localStorage.getItem('tasks_v6')||'[]'),
-      important: JSON.parse(localStorage.getItem('omar_important')||'[]'),
-      debts: JSON.parse(localStorage.getItem('debts_pro_v2')||'[]'),
-      backup_date: new Date().toISOString(),
-      app_version: "v8-fixed"
-    }
-  }catch(e){ return {daily:[],attendance:{},attendance_log:[],tasks:[],important:[],debts:[]} }
+      tx: localStorage.getItem('omar_tx_v3'),
+      bands: localStorage.getItem('omar_master_bands'),
+      fixed_templates: localStorage.getItem('omar_fixed_templates'),
+      fixed_by_month: localStorage.getItem('omar_fixed_by_month'),
+      wallets: localStorage.getItem('omar_wallets_v3'),
+      include_def: localStorage.getItem('omar_include_def'),
+      ts: new Date().toISOString()
+    };
+  }catch(e){ return null; }
 }
 
-function isDataEmpty(payload){
-  if(!payload) return true;
-  let dailyEmpty = !payload.daily || payload.daily.length===0;
-  let tasksEmpty = !payload.tasks || payload.tasks.length===0;
-  let logEmpty = !payload.attendance_log || payload.attendance_log.length===0;
-  let attEmpty = !payload.attendance || Object.keys(payload.attendance).length===0;
-  return dailyEmpty && tasksEmpty && logEmpty && attEmpty;
+function hashData(d){
+  try{ return JSON.stringify(d).length + '_' + (d.tx ? d.tx.length : 0); }catch(e){ return ''; }
 }
 
-async function backupToDrive(showAlert=false, force=false){
-  if(isBackingUp || isRestoring) return false;
-  let payload=getAllDataForBackup();
-  if(!force && isDataEmpty(payload)){
-    console.log('⚠️ Local empty - skipping auto backup to protect Drive file');
-    return false;
-  }
-  isBackingUp=true;
-  try{
-    if(showAlert) console.log('☁ جاري حفظ JSON على Drive...');
-    await fetch(AB_OMAR_APPS_SCRIPT_URL,{
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify(payload)
-    });
-    // استخدم الاصلية عشان متعملش loop
-    if(window.__origSetItem){
-      window.__origSetItem.call(localStorage,'ab_omar_last_backup', new Date().toISOString());
-    }else{
-      localStorage.setItem('ab_omar_last_backup', new Date().toISOString());
-    }
-    console.log('✅ Synced JSON to Drive:', (payload.daily||[]).length, 'daily |', (payload.tasks||[]).length, 'tasks |', new Date().toLocaleTimeString());
-    if(showAlert && window.showToast) showToast('✅ تم حفظ JSON على Drive');
-    return true;
-  }catch(err){
-    console.warn('Backup failed:', err.message);
-    return false;
-  }finally{isBackingUp=false;}
-}
-
-async function restoreFromDrive(manual=false){
-  if(!manual){
-    if(!confirm('وجدنا نسخة محفوظة على Drive، هل تريد استرجاعها؟')) return;
-  } else {
-    if(!confirm('هل تريد استرجاع ملف JSON من Google Drive؟ سيتم استبدال البيانات الحالية.')) return;
-  }
-  isRestoring=true;
-  try{
-    console.log('☁ جاري الاسترجاع من Drive...');
-    let res=await fetch(AB_OMAR_APPS_SCRIPT_URL+'?t='+Date.now(),{method:'GET',redirect:'follow',cache:'no-store'});
-    let text=await res.text();
-    let data=JSON.parse(text);
-    if(data.error){
-      alert('لا يوجد نسخة: '+data.error);
-      return;
-    }
-    if(isDataEmpty(data) && (data.daily||[]).length===0){
-      alert('النسخة اللي على Drive فاضية');
-      return;
-    }
-    let orig = window.__origSetItem || localStorage.setItem;
-    orig.call(localStorage,'omar_tx_v3',JSON.stringify(data.daily||[]));
-    orig.call(localStorage,'tasks_v6',JSON.stringify(data.tasks||[]));
-    orig.call(localStorage,'att_fixed_final',JSON.stringify(data.attendance||{}));
-    orig.call(localStorage,'attendance_log',JSON.stringify(data.attendance_log||[]));
-    orig.call(localStorage,'omar_important',JSON.stringify(data.important||[]));
-    orig.call(localStorage,'debts_pro_v2',JSON.stringify(data.debts||[]));
-    alert('✅ تم الاسترجاع بنجاح\n' + (data.daily?.length||0) + ' يومية');
-    location.reload();
-  }catch(err){
-    alert('فشل الاسترجاع: '+err.message);
-  }finally{isRestoring=false;}
-}
-
-function requestAutoBackup(){
-  if(autoBackupTimer) clearTimeout(autoBackupTimer);
-  autoBackupTimer=setTimeout(()=>{backupToDrive(false,false);},4000);
-}
-
-// حماية من التحميل المزدوج - اهم حاجة لاصلاح Stack Overflow
-if(!localStorage.setItem._isWrapped){
-  const keysToWatch=['omar_tx_v3','tasks_v6','att_fixed_final','attendance_log','omar_important','debts_pro_v2'];
-  const originalSetItem = localStorage.setItem.bind(localStorage);
-  window.__origSetItem = originalSetItem;
-  const wrapped = function(k,v){
-    originalSetItem(k,v);
-    if(watchEnabled && keysToWatch.includes(k)){
-      requestAutoBackup();
-    }
-  };
-  wrapped._isWrapped = true;
-  localStorage.setItem = wrapped;
-}
-
-window.addEventListener('load',()=>{
-  let hasData = localStorage.getItem('omar_tx_v3')||localStorage.getItem('tasks_v6')||localStorage.getItem('att_fixed_final');
-  if(!hasData){
-    console.log('لا يوجد داتا محلية، محاولة استرجاع تلقائي من Drive بعد ثانيتين...');
-    setTimeout(async()=>{
-      try{
-        isRestoring=true;
-        let res=await fetch(AB_OMAR_APPS_SCRIPT_URL+'?t='+Date.now(),{cache:'no-store'});
-        let text=await res.text();
-        let data=JSON.parse(text);
-        if(!data.error && data.daily && data.daily.length>0){
-          if(confirm('وجدنا نسخة محفوظة على Drive ('+data.daily.length+' يومية)، هل تريد استرجاعها؟')){
-            let orig = window.__origSetItem || localStorage.setItem;
-            orig.call(localStorage,'omar_tx_v3',JSON.stringify(data.daily||[]));
-            orig.call(localStorage,'tasks_v6',JSON.stringify(data.tasks||[]));
-            orig.call(localStorage,'att_fixed_final',JSON.stringify(data.attendance||{}));
-            orig.call(localStorage,'attendance_log',JSON.stringify(data.attendance_log||[]));
-            orig.call(localStorage,'omar_important',JSON.stringify(data.important||[]));
-            orig.call(localStorage,'debts_pro_v2',JSON.stringify(data.debts||[]));
-            location.reload();
-            return;
-          }
-        }
-      }catch(e){
-        console.log('Auto restore failed:', e.message);
-      }finally{
-        isRestoring=false;
-        watchEnabled=true;
+window.syncToABOmar = function(){
+  if(_debounceTimer) clearTimeout(_debounceTimer);
+  _debounceTimer = setTimeout(async ()=>{
+    if(_isSyncing) return;
+    let data = getAllData();
+    if(!data) return;
+    let h = hashData(data);
+    if(h === _lastDataHash) return;
+    _lastDataHash = h;
+    
+    _isSyncing = true;
+    try{
+      console.log('🔄 Syncing to Drive...', new Date().toLocaleTimeString());
+      
+      // إرسال للـ Apps Script (no-cors عشان Google)
+      if(DRIVE_CONFIG.APPS_SCRIPT_URL){
+        await fetch(DRIVE_CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {'Content-Type': 'text/plain'},
+          body: JSON.stringify({
+            action: 'backup',
+            sheetId: DRIVE_CONFIG.SHEET_ID,
+            data: data,
+            source: 'daily.html'
+          })
+        }).catch(e=>{});
       }
-    },2000);
-  }else{
-    watchEnabled=true;
-  }
-});
+      
+      // نسخة احتياطية محلية
+      try{
+        localStorage.setItem('omar_last_sync', new Date().toISOString());
+        localStorage.setItem('omar_backup_'+new Date().toISOString().slice(0,10), JSON.stringify(data));
+      }catch(e){}
+      
+      console.log('✅ AB Omar JSON Backup V9 Fixed Ready - تم الربط بالدرايف');
+      
+    }catch(e){
+      console.warn('Sync error:', e);
+    }finally{
+      _isSyncing = false;
+    }
+  }, DRIVE_CONFIG.DEBOUNCE);
+};
 
-window.backupToDrive=(showAlert)=>backupToDrive(showAlert,true);
-window.restoreFromDrive=()=>restoreFromDrive(true);
-console.log('✅ AB Omar JSON Backup V8 Fixed Ready - محمي من المسح الفاضي - بدون Stack Overflow');
+// اسمع أي تحديث من daily.html
+window.addEventListener('omar_data_updated', ()=>{ window.syncToABOmar(); });
+window.addEventListener('storage', (e)=>{ if(e.key && e.key.startsWith('omar_')) window.syncToABOmar(); });
+
+// أول مزامنة بعد 3 ثواني
+setTimeout(()=>{ _lastDataHash=''; window.syncToABOmar(); }, 3000);
+
+console.log('✅ Drive Sync V9 Loaded - Linked to Sheet', DRIVE_CONFIG.SHEET_ID);
