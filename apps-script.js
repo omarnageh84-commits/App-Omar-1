@@ -1,107 +1,62 @@
-// AB Omar - Drive File Backup - V7 - يبحث في كل الملفات المؤرخة
-function doPost(e){
-  try{
-    let dataStr = e.postData.contents;
-    let data = JSON.parse(dataStr);
-    // لو الداتا فاضية تماما مترفعش (حماية اضافية من جهة السيرفر)
-    let isEmpty = (!data.daily || data.daily.length==0) && (!data.tasks || data.tasks.length==0) && (!data.attendance_log || data.attendance_log.length==0) && (!data.attendance || Object.keys(data.attendance).length==0);
-    // بس لو جاي من زرار يدوي هنسمح، نعرف من app_version؟ هنسمح دايما بس نسجل
-    if(isEmpty){
-      // هنحفظه بس مش هنمسح القديم؟ هنحفظه باسم فاضي منفصل
-      DriveApp.createFile('AB_Omar_Empty_' + new Date().toISOString() + '.json', dataStr, MimeType.PLAIN_TEXT);
-      // لو فاضي مترجعش يمسح الاساسي لو الاساسي فيه داتا كبيرة
-      let mainFiles = DriveApp.getFilesByName('AB_Omar_Backup.json');
-      if(mainFiles.hasNext()){
-        let mainFile = mainFiles.next();
-        let mainContent = mainFile.getBlob().getDataAsString();
-        if(mainContent.length > 500){ // لو الاساسي فيه داتا كبيرة متسمحوش للفاضي يمسحه
-          return ContentService.createTextOutput(JSON.stringify({ok:true, skippedEmpty:true})).setMimeType(ContentService.MimeType.JSON);
-        }
-      }
-    }
 
-    let fileName = 'AB_Omar_Backup.json';
-    let files = DriveApp.getFilesByName(fileName);
-    if(files.hasNext()){
-      files.next().setContent(dataStr);
-    }else{
-      DriveApp.createFile(fileName, dataStr, MimeType.PLAIN_TEXT);
-    }
-    // نسخة يومية
-    let dateStr = new Date().toISOString().slice(0,10);
-    let backupName = 'AB_Omar_Backup_' + dateStr + '_.json';
-    let dayFiles = DriveApp.getFilesByName(backupName);
-    if(!dayFiles.hasNext()){
-      DriveApp.createFile(backupName, dataStr, MimeType.PLAIN_TEXT);
-    }
-    // الاسم الصغير
-    let smallFiles = DriveApp.getFilesByName('omar-backup.json');
-    if(smallFiles.hasNext()){
-      smallFiles.next().setContent(dataStr);
-    }else{
-      DriveApp.createFile('omar-backup.json', dataStr, MimeType.PLAIN_TEXT);
-    }
-    return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
-  }catch(err){
-    return ContentService.createTextOutput(JSON.stringify({error: err.message})).setMimeType(ContentService.MimeType.JSON);
+// apps-script.js - مربوط باللينك الجديد
+// URL: https://script.google.com/macros/s/AKfycbyV8WQb8MIN3Dxfc7IBBXIYjgza-xFq6p_ujvu66z_95mcfvr4t5ZpAXRzAZbdkCDgC/exec
+// Sheet ID: 12KpLcWLt7Xzb09A6D8qErKOvEhZvqX9-AUTn5052RdQ
+
+const SHEET_NAME = 'App-Omar-Backup';
+const SHEET_ID = '12KpLcWLt7Xzb09A6D8qErKOvEhZvqX9-AUTn5052RdQ';
+
+function doPost(e) {
+  try {
+    let data = JSON.parse(e.postData.contents);
+    let ss = SpreadsheetApp.openById(SHEET_ID);
+    let sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
+    
+    let jsonStr = JSON.stringify(data.data);
+    sheet.clear();
+    sheet.getRange(1,1).setValue(jsonStr);
+    sheet.getRange(1,2).setValue(new Date().toISOString());
+    sheet.getRange(1,3).setValue('Backup');
+    
+    return ContentService.createTextOutput(JSON.stringify({status:'ok', saved: true}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error', error: err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-function doGet(){
-  try{
-    let names = ['AB_Omar_Backup.json', 'omar-backup.json'];
-    for(let i=0;i<names.length;i++){
-      let files = DriveApp.getFilesByName(names[i]);
-      if(files.hasNext()){
-        let content = files.next().getBlob().getDataAsString();
-        if(content && content.length>50){
-          let parsed = JSON.parse(content);
-          // لو الملف الاساسي فاضي، دور على احدث ملف مؤرخ فيه داتا
-          if(!parsed.daily || parsed.daily.length==0){
-            // دور على الملفات المؤرخة
-            let allFiles = DriveApp.getFiles();
-            let bestContent = null;
-            let bestLen = 0;
-            while(allFiles.hasNext()){
-              let f = allFiles.next();
-              let n = f.getName();
-              if(n.indexOf('AB_Omar_Backup_')==0 && n.indexOf('_.json')>0){
-                let c = f.getBlob().getDataAsString();
-                if(c.length>bestLen){
-                  try{
-                    let p = JSON.parse(c);
-                    if(p.daily && p.daily.length>0){
-                      bestContent=c;
-                      bestLen=c.length;
-                    }
-                  }catch(e){}
-                }
-              }
-            }
-            if(bestContent) return ContentService.createTextOutput(bestContent).setMimeType(ContentService.MimeType.JSON);
-          }
-          return ContentService.createTextOutput(content).setMimeType(ContentService.MimeType.JSON);
-        }
-      }
+function doGet(e) {
+  try {
+    let action = e.parameter.action;
+    let ss = SpreadsheetApp.openById(SHEET_ID);
+    let sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify({tx: [], error: 'no backup'}))
+        .setMimeType(ContentService.MimeType.JSON);
     }
-    // لو ملقاش الاساسي، دور على المؤرخ
-    let allFiles = DriveApp.getFiles();
-    let bestContent = null;
-    let bestLen = 0;
-    while(allFiles.hasNext()){
-      let f = allFiles.next();
-      let n = f.getName();
-      if(n.indexOf('AB_Omar_Backup_')==0){
-        let c = f.getBlob().getDataAsString();
-        if(c.length>bestLen){
-          try{ let p=JSON.parse(c); if(p.daily && p.daily.length>0){bestContent=c; bestLen=c.length;}}catch(e){}
-        }
-      }
-    }
-    if(bestContent) return ContentService.createTextOutput(bestContent).setMimeType(ContentService.MimeType.JSON);
     
-    return ContentService.createTextOutput(JSON.stringify({error: 'No backup found'})).setMimeType(ContentService.MimeType.JSON);
-  }catch(err){
-    return ContentService.createTextOutput(JSON.stringify({error: err.message})).setMimeType(ContentService.MimeType.JSON);
+    let jsonStr = sheet.getRange(1,1).getValue();
+    if (!jsonStr) {
+      return ContentService.createTextOutput(JSON.stringify({tx: [], error: 'empty'}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    let parsed = JSON.parse(jsonStr);
+    let result = {};
+    try { result.tx = JSON.parse(parsed.tx || '[]'); } catch(e){ result.tx = []; }
+    try { result.bands = JSON.parse(parsed.bands || '[]'); } catch(e){ result.bands = []; }
+    try { result.fixed_templates = JSON.parse(parsed.fixed_templates || '[]'); } catch(e){ result.fixed_templates = []; }
+    try { result.fixed_by_month = JSON.parse(parsed.fixed_by_month || '{}'); } catch(e){ result.fixed_by_month = {}; }
+    try { result.wallets = JSON.parse(parsed.wallets || '[]'); } catch(e){ result.wallets = []; }
+    
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders({'Access-Control-Allow-Origin': '*'});
+      
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error', error: err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
