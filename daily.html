@@ -399,14 +399,6 @@ let _isSyncing = false;
 
 function getAllData(){
   try{
-    // نجمع كل مفاتيح omar_ عشان الـ 3 تبويبات
-    let all = {};
-    for(let i=0;i<localStorage.length;i++){
-      let k = localStorage.key(i);
-      if(k && k.startsWith('omar_')){
-        all[k] = localStorage.getItem(k);
-      }
-    }
     return {
       tx: localStorage.getItem('omar_tx_v3'),
       bands: localStorage.getItem('omar_master_bands'),
@@ -414,17 +406,13 @@ function getAllData(){
       fixed_by_month: localStorage.getItem('omar_fixed_by_month'),
       wallets: localStorage.getItem('omar_wallets_v3'),
       include_def: localStorage.getItem('omar_include_def'),
-      all_omar_keys: all,
       ts: new Date().toISOString()
     };
   }catch(e){ return null; }
 }
 
 function hashData(d){
-  try{ 
-    let allStr = d.all_omar_keys ? JSON.stringify(d.all_omar_keys) : '';
-    return allStr.length + '_' + (d.tx ? d.tx.length : 0); 
-  }catch(e){ return ''; }
+  try{ return JSON.stringify(d).length + '_' + (d.tx ? d.tx.length : 0); }catch(e){ return ''; }
 }
 
 window.syncToABOmar = function(){
@@ -475,84 +463,6 @@ window.addEventListener('storage', (e)=>{ if(e.key && e.key.startsWith('omar_'))
 setTimeout(()=>{ _lastDataHash=''; window.syncToABOmar(); }, 3000);
 
 console.log('✅ Drive Sync V10 Loaded - JSON Only - File:', DRIVE_CONFIG.FILE_NAME);
-
-// ===== Restore from Drive JSON - V11 FIXED =====
-async function restoreFromDrive(){
-  // لو فيه داتا محلية متعملش restore عشان متغطيش على الجديد
-  let hasLocal = localStorage.getItem('omar_tx_v3');
-  if(hasLocal && hasLocal.length > 10){
-    console.log('Local data exists, skip restore');
-    return;
-  }
-  // كمان لو فيه اي مفتاح omar_ تاني
-  let hasAny = false;
-  for(let i=0;i<localStorage.length;i++){
-    let k = localStorage.key(i);
-    if(k && k.startsWith('omar_') && k !== 'omar_theme' && k !== 'omar_last_sync'){
-      let v = localStorage.getItem(k);
-      if(v && v.length > 10){ hasAny = true; break; }
-    }
-  }
-  if(hasAny){
-    console.log('Local data exists (any omar key), skip restore');
-    return;
-  }
-
-  try{
-    console.log('📥 Trying to restore from Drive JSON...');
-    let res = await fetch(DRIVE_CONFIG.APPS_SCRIPT_URL + '?action=restore&t=' + Date.now(), {method:'GET'});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    let data = await res.json();
-    console.log('📥 Got data from Drive:', Object.keys(data));
-    let src = data.data || data;
-    if(!src.tx && data.tx) src = data;
-    
-    // لو الملف متخزن مباشرة بمفاتيح omar_
-    let keys = Object.keys(src).filter(k => k.startsWith('omar_'));
-    if(keys.length > 0){
-      keys.forEach(k => {
-        if(src[k]) localStorage.setItem(k, typeof src[k] === 'string' ? src[k] : JSON.stringify(src[k]));
-      });
-      // توافق قديم
-      if(src['omar_tx_v3'] && !src.tx) src.tx = src['omar_tx_v3'];
-      if(src['omar_master_bands'] && !src.bands) src.bands = src['omar_master_bands'];
-    }
-
-    if(src && (src.tx || src['omar_tx_v3'] || keys.length>0)){
-      if(src.tx) localStorage.setItem('omar_tx_v3', typeof src.tx === 'string' ? src.tx : JSON.stringify(src.tx));
-      if(src.bands) localStorage.setItem('omar_master_bands', typeof src.bands === 'string' ? src.bands : JSON.stringify(src.bands));
-      if(src.fixed_templates) localStorage.setItem('omar_fixed_templates', typeof src.fixed_templates === 'string' ? src.fixed_templates : JSON.stringify(src.fixed_templates));
-      if(src.fixed_by_month) localStorage.setItem('omar_fixed_by_month', typeof src.fixed_by_month === 'string' ? src.fixed_by_month : JSON.stringify(src.fixed_by_month));
-      if(src.wallets) localStorage.setItem('omar_wallets_v3', typeof src.wallets === 'string' ? src.wallets : JSON.stringify(src.wallets));
-      if(src.include_def) localStorage.setItem('omar_include_def', typeof src.include_def === 'string' ? src.include_def : JSON.stringify(src.include_def));
-      // tasks و attendance
-      if(src['omar_tasks_v1']) localStorage.setItem('omar_tasks_v1', typeof src['omar_tasks_v1'] === 'string' ? src['omar_tasks_v1'] : JSON.stringify(src['omar_tasks_v1']));
-      if(src['omar_cats_v1']) localStorage.setItem('omar_cats_v1', typeof src['omar_cats_v1'] === 'string' ? src['omar_cats_v1'] : JSON.stringify(src['omar_cats_v1']));
-      if(src['att_fixed_final']) localStorage.setItem('att_fixed_final', typeof src['att_fixed_final'] === 'string' ? src['att_fixed_final'] : JSON.stringify(src['att_fixed_final']));
-      
-      console.log('✅ Restored from Drive JSON!', src.ts || src.lastUpdated || '');
-      // reload data into app
-      if(typeof loadData === 'function'){ loadData(); }
-      if(typeof refreshCurrent === 'function'){ 
-        setTimeout(()=>{ try{ refreshCurrent(); }catch(e){} }, 500);
-      }
-      setTimeout(()=>{ location.reload(); }, 800);
-      return true;
-    }else{
-      console.log('No backup data in Drive JSON', data);
-    }
-  }catch(e){
-    console.warn('Restore failed:', e);
-  }
-  return false;
-}
-
-// شغل الاسترجاع أول ما الصفحة تحمل قبل أي sync
-(function(){
-  setTimeout(()=>{ restoreFromDrive(); }, 1000);
-})();
-
-
 
 </script>
 <style>html,body{max-width:430px;margin:0 auto!important;background:var(--bg);} body{border-left:1px solid var(--card-border);border-right:1px solid var(--card-border); min-height:100dvh;}

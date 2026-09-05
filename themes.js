@@ -45,7 +45,30 @@ window.toggleTheme = function(){
 // ===== Core functions that were missing and caused ReferenceError =====
 // نعرفهم فقط لو مش موجودين في daily.html عشان منغيرش حاجة
 
-
+if(typeof globalSearchQuery === 'undefined'){
+  var globalSearchQuery = '';
+}
+if(typeof globalSearchFilter === 'undefined'){
+  var globalSearchFilter = 'all';
+}
+if(typeof reportVisible === 'undefined'){
+  var reportVisible = false;
+}
+if(typeof curDebtSub === 'undefined'){
+  var curDebtSub = 'due';
+}
+if(typeof fixedOpen === 'undefined'){
+  var fixedOpen = true;
+}
+if(typeof currentBand === 'undefined'){
+  var currentBand = '';
+}
+if(typeof currentSection === 'undefined'){
+  var currentSection = '';
+}
+if(typeof promptCallback === 'undefined'){
+  var promptCallback = null;
+}
 if(typeof dayFilter === 'undefined'){
   var dayFilter = {expense:'month', income:'month', debt:'month', amanat:'month'};
 }
