@@ -1,62 +1,118 @@
+/**
+ * apps-script.js - نسخة جديدة
+ * بيكتب في ملف JSON فقط - لا يكتب في شيت نهائيا
+ * يحدث نفس الملف: Omar Backup.json
+ */
 
-// apps-script.js - مربوط باللينك الجديد
-// URL: https://script.google.com/macros/s/AKfycbyV8WQb8MIN3Dxfc7IBBXIYjgza-xFq6p_ujvu66z_95mcfvr4t5ZpAXRzAZbdkCDgC/exec
-// Sheet ID: 12KpLcWLt7Xzb09A6D8qErKOvEhZvqX9-AUTn5052RdQ
+const FILE_NAME = 'Omar Backup.json';
+const FILE_ID = '1d-SvP_ldsgF1GiM6R9HbDN1MX431JzDr'; // الـ ID الرسمي الوحيد
 
-const SHEET_NAME = 'App-Omar-Backup';
-const SHEET_ID = '12KpLcWLt7Xzb09A6D8qErKOvEhZvqX9-AUTn5052RdQ';
+/**
+ * يجيب الملف الرسمي
+ */
+function getBackupFile() {
+  try {
+    return DriveApp.getFileById(FILE_ID);
+  } catch (e) {
+    // لو الـ ID مش موجود لأي سبب، دور بالاسم
+    const files = DriveApp.getFilesByName(FILE_NAME);
+    if (files.hasNext()) {
+      return files.next();
+    }
+    // لو مش موجود خالص، انشئه
+    return DriveApp.createFile(FILE_NAME, '{}', MimeType.PLAIN_TEXT);
+  }
+}
 
+/**
+ * يكتب / يحدث البيانات في الـ JSON فقط
+ * @param {Object} newData - البيانات الجديدة
+ */
+function saveToJson(newData) {
+  const file = getBackupFile();
+  
+  let existingData = {};
+  try {
+    const content = file.getBlob().getDataAsString();
+    if (content && content.trim()) {
+      existingData = JSON.parse(content);
+    }
+  } catch (e) {
+    existingData = {};
+  }
+  
+  // دمج البيانات الجديدة مع القديمة
+  const mergedData = {
+    ...existingData,
+    ...newData,
+    lastUpdated: new Date().toISOString()
+  };
+  
+  file.setContent(JSON.stringify(mergedData, null, 2));
+  
+  Logger.log('✅ تم التحديث في ' + FILE_NAME);
+  return mergedData;
+}
+
+/**
+ * يضيف عنصر جديد للمصفوفة في الـ JSON
+ * مثال: لو عندك قائمة عملاء او اوردرات
+ */
+function appendToJsonArray(key, item) {
+  const file = getBackupFile();
+  
+  let data = {};
+  try {
+    data = JSON.parse(file.getBlob().getDataAsString() || '{}');
+  } catch (e) {
+    data = {};
+  }
+  
+  if (!Array.isArray(data[key])) {
+    data[key] = [];
+  }
+  
+  data[key].push({
+    ...item,
+    _addedAt: new Date().toISOString()
+  });
+  
+  data.lastUpdated = new Date().toISOString();
+  
+  file.setContent(JSON.stringify(data, null, 2));
+  Logger.log('✅ تم اضافة عنصر جديد لـ ' + key);
+  return data;
+}
+
+/**
+ * يجيب البيانات الحالية من الـ JSON
+ */
+function getJsonData() {
+  const file = getBackupFile();
+  try {
+    return JSON.parse(file.getBlob().getDataAsString() || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+
+// للـ Web App - يستقبل POST ويكتب في JSON فقط
 function doPost(e) {
   try {
-    let data = JSON.parse(e.postData.contents);
-    let ss = SpreadsheetApp.openById(SHEET_ID);
-    let sheet = ss.getSheetByName(SHEET_NAME);
-    if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
-    
-    let jsonStr = JSON.stringify(data.data);
-    sheet.clear();
-    sheet.getRange(1,1).setValue(jsonStr);
-    sheet.getRange(1,2).setValue(new Date().toISOString());
-    sheet.getRange(1,3).setValue('Backup');
-    
-    return ContentService.createTextOutput(JSON.stringify({status:'ok', saved: true}))
+    const payload = JSON.parse(e.postData.contents);
+    const result = saveToJson(payload);
+    return ContentService.createTextOutput(JSON.stringify({ success: true, data: result }))
       .setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({status:'error', error: err.toString()}))
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-function doGet(e) {
-  try {
-    let action = e.parameter.action;
-    let ss = SpreadsheetApp.openById(SHEET_ID);
-    let sheet = ss.getSheetByName(SHEET_NAME);
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({tx: [], error: 'no backup'}))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    let jsonStr = sheet.getRange(1,1).getValue();
-    if (!jsonStr) {
-      return ContentService.createTextOutput(JSON.stringify({tx: [], error: 'empty'}))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    let parsed = JSON.parse(jsonStr);
-    let result = {};
-    try { result.tx = JSON.parse(parsed.tx || '[]'); } catch(e){ result.tx = []; }
-    try { result.bands = JSON.parse(parsed.bands || '[]'); } catch(e){ result.bands = []; }
-    try { result.fixed_templates = JSON.parse(parsed.fixed_templates || '[]'); } catch(e){ result.fixed_templates = []; }
-    try { result.fixed_by_month = JSON.parse(parsed.fixed_by_month || '{}'); } catch(e){ result.fixed_by_month = {}; }
-    try { result.wallets = JSON.parse(parsed.wallets || '[]'); } catch(e){ result.wallets = []; }
-    
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({'Access-Control-Allow-Origin': '*'});
-      
-  } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({status:'error', error: err.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+// دالة للاختبار
+function testSave() {
+  saveToJson({
+    message: "هذا اختبار - الكتابة في JSON فقط",
+    test: true
+  });
 }
