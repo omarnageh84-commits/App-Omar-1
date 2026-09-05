@@ -382,14 +382,13 @@ td{padding:7px 3px;border-bottom:1px solid var(--bg-soft);text-align:center;font
 
 </style>
 <script>
-
-// drive-sync.js - AB Omar V9 Fixed - Drive Linked
-// مربوط بـ Google Sheet ID: 12KpLcWLt7Xzb09A6D8qErKOvEhZvqX9-AUTn5052RdQ
+// drive-sync.js - AB Omar V10 - JSON ONLY - Single File
+// يكتب في ملف واحد فقط: Omar Backup.json - ID: 1d-SvP_ldsgF1GiM6R9HbDN1MX431JzDr
 // Apps Script: https://script.google.com/macros/s/AKfycbyV8WQb8MIN3Dxfc7IBBXIYjgza-xFq6p_ujvu66z_95mcfvr4t5ZpAXRzAZbdkCDgC/exec
-// هذا الملف فقط هو اللي بيتعدل - daily.html لم يتغير منه حرف
 
 const DRIVE_CONFIG = {
-  SHEET_ID: '12KpLcWLt7Xzb09A6D8qErKOvEhZvqX9-AUTn5052RdQ',
+  FILE_ID: '1d-SvP_ldsgF1GiM6R9HbDN1MX431JzDr',
+  FILE_NAME: 'Omar Backup.json',
   APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyV8WQb8MIN3Dxfc7IBBXIYjgza-xFq6p_ujvu66z_95mcfvr4t5ZpAXRzAZbdkCDgC/exec',
   DEBOUNCE: 1500
 };
@@ -428,9 +427,8 @@ window.syncToABOmar = function(){
     
     _isSyncing = true;
     try{
-      console.log('🔄 Syncing to Drive...', new Date().toLocaleTimeString());
+      console.log('🔄 Syncing to Drive JSON Only...', new Date().toLocaleTimeString());
       
-      // إرسال للـ Apps Script (no-cors عشان Google)
       if(DRIVE_CONFIG.APPS_SCRIPT_URL){
         await fetch(DRIVE_CONFIG.APPS_SCRIPT_URL, {
           method: 'POST',
@@ -438,20 +436,18 @@ window.syncToABOmar = function(){
           headers: {'Content-Type': 'text/plain'},
           body: JSON.stringify({
             action: 'backup',
-            sheetId: DRIVE_CONFIG.SHEET_ID,
+            fileId: DRIVE_CONFIG.FILE_ID,
             data: data,
             source: 'daily.html'
           })
         }).catch(e=>{});
       }
       
-      // نسخة احتياطية محلية
       try{
         localStorage.setItem('omar_last_sync', new Date().toISOString());
-        localStorage.setItem('omar_backup_'+new Date().toISOString().slice(0,10), JSON.stringify(data));
       }catch(e){}
       
-      console.log('✅ AB Omar JSON Backup V9 Fixed Ready - تم الربط بالدرايف');
+      console.log('✅ AB Omar JSON Backup V10 - Single File Ready - Omar Backup.json');
       
     }catch(e){
       console.warn('Sync error:', e);
@@ -461,14 +457,12 @@ window.syncToABOmar = function(){
   }, DRIVE_CONFIG.DEBOUNCE);
 };
 
-// اسمع أي تحديث من daily.html
 window.addEventListener('omar_data_updated', ()=>{ window.syncToABOmar(); });
 window.addEventListener('storage', (e)=>{ if(e.key && e.key.startsWith('omar_')) window.syncToABOmar(); });
 
-// أول مزامنة بعد 3 ثواني
 setTimeout(()=>{ _lastDataHash=''; window.syncToABOmar(); }, 3000);
 
-console.log('✅ Drive Sync V9 Loaded - Linked to Sheet', DRIVE_CONFIG.SHEET_ID);
+console.log('✅ Drive Sync V10 Loaded - JSON Only - File:', DRIVE_CONFIG.FILE_NAME);
 
 </script>
 <style>html,body{max-width:430px;margin:0 auto!important;background:var(--bg);} body{border-left:1px solid var(--card-border);border-right:1px solid var(--card-border); min-height:100dvh;}
