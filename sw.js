@@ -1,5 +1,5 @@
-const CACHE='app-omar-v15';
-const ASSETS=['./','./index.html','./daily.html','./attendance.html','./tasks.html','./themes.js','./drive-sync.js','./manifest.json','./icon_192.png','./icon_512.png'];
+const CACHE='app-omar-v16-json-only';
+const ASSETS=['./','./index.html','./daily.html','./attendance.html','./tasks.html','./themes.js','./manifest.json','./icon_192.png','./icon_512.png'];
 
 self.addEventListener('install',e=>{
   self.skipWaiting();
