@@ -383,13 +383,13 @@ td{padding:7px 3px;border-bottom:1px solid var(--bg-soft);text-align:center;font
 </style>
 <script>
 // drive-sync.js - AB Omar V10 - JSON ONLY - Single File
-// يكتب في ملف واحد فقط: Omar Backup.json - ID: 1d-SvP_ldsgF1GiM6R9HbDN1MX431JzDr
+// يكتب في ملف واحد فقط: Omar-Backup-FRESH.json - ID: 1-PP-FBNJp12RlIm7mPl1iRQ1D0C-rnkd
 // Apps Script: https://script.google.com/macros/s/AKfycbyV8WQb8MIN3Dxfc7IBBXIYjgza-xFq6p_ujvu66z_95mcfvr4t5ZpAXRzAZbdkCDgC/exec
 
 const DRIVE_CONFIG = {
-  FILE_ID: '1d-SvP_ldsgF1GiM6R9HbDN1MX431JzDr',
-  FILE_NAME: 'Omar Backup.json',
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwxFKGX9G1v6DvXXFH_sNhpE_QgEI8HWzrgLw9uj8_E9EOsg9tFzrqyR6tFpBVrmIgDOg/exec',
+  FILE_ID: '1-PP-FBNJp12RlIm7mPl1iRQ1D0C-rnkd',
+  FILE_NAME: 'Omar-Backup-FRESH.json',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyV8WQb8MIN3Dxfc7IBBXIYjgza-xFq6p_ujvu66z_95mcfvr4t5ZpAXRzAZbdkCDgC/exec',
   DEBOUNCE: 1500
 };
 
@@ -447,7 +447,7 @@ window.syncToABOmar = function(){
         localStorage.setItem('omar_last_sync', new Date().toISOString());
       }catch(e){}
       
-      console.log('✅ AB Omar JSON Backup V10 - Single File Ready - Omar Backup.json');
+      console.log('✅ AB Omar FRESH V15 - Fixed - Single File Ready - Omar-Backup-FRESH.json');
       
     }catch(e){
       console.warn('Sync error:', e);
@@ -462,7 +462,7 @@ window.addEventListener('storage', (e)=>{ if(e.key && e.key.startsWith('omar_'))
 
 setTimeout(()=>{ _lastDataHash=''; window.syncToABOmar(); }, 3000);
 
-console.log('✅ Drive Sync V10 Loaded - JSON Only - File:', DRIVE_CONFIG.FILE_NAME);
+console.log('✅ Drive Sync V15 FRESH Fixed - globalSearchQuery + persist order fixed - JSON Only - File:', DRIVE_CONFIG.FILE_NAME);
 
 </script>
 <style>html,body{max-width:430px;margin:0 auto!important;background:var(--bg);} body{border-left:1px solid var(--card-border);border-right:1px solid var(--card-border); min-height:100dvh;}
@@ -857,7 +857,17 @@ function addFixed(){openFixedModal();}
 
 
 
-function persist(){localStorage.setItem('omar_tx_v3',JSON.stringify(transactions));localStorage.setItem('omar_master_bands',JSON.stringify(masterBands));localStorage.setItem('omar_include_def',JSON.stringify(includeDeferredInBalance));try{if(window.syncToABOmar){ _lastDataHash=''; syncToABOmar(); } if(window.parent&&window.parent.syncToABOmar)window.parent.syncToABOmar()}catch(e){}try{window.dispatchEvent(new Event('omar_data_updated'));if(window.parent)window.parent.postMessage({type:'omar_data_updated'},'*')}catch(e){}}
+function persist(){
+  try{
+    localStorage.setItem('omar_master_bands', JSON.stringify(masterBands||[]));
+    localStorage.setItem('omar_fixed_templates', JSON.stringify(fixedTemplates||[]));
+    localStorage.setItem('omar_fixed_by_month', JSON.stringify(fixedByMonth||{}));
+    localStorage.setItem('omar_tx_v3', JSON.stringify(transactions||[]));
+    if(typeof wallets!=='undefined') localStorage.setItem('omar_wallets_v3', JSON.stringify(wallets));
+    _lastDataHash=''; 
+    if(typeof syncToABOmar==='function') syncToABOmar();
+  }catch(e){ console.warn('persist error', e); }
+}
 function ensureMaster(){if(masterBands.length===0){masterBands=[{id:1,name:'الإيجار',section:'expense'},{id:2,name:'الكهرباء',section:'expense'},{id:3,name:'مبيعات',section:'income'},{id:4,name:'أحمد',section:'debt_due'},{id:5,name:'سامي',section:'amanat'}];}persist()}
 function getBands(sec){return masterBands.filter(b=>b.section===sec).map(b=>b.name)}
 function getMonthRange(ym){const[y,m]=ym.split('-').map(Number);const first=`${ym}-01`;const lastDay=new Date(y,m,0).getDate();const last=`${ym}-${String(lastDay).padStart(2,'0')}`;return{first,last,y,m}}
