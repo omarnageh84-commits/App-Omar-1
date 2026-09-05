@@ -947,7 +947,7 @@ function addFixed(){openFixedModal();}
 
 
 
-function persist(){try{if(window.syncToABOmar)syncToABOmar();if(window.parent&&window.parent.syncToABOmar)window.parent.syncToABOmar()}catch(e){}localStorage.setItem('omar_tx_v3',JSON.stringify(transactions));localStorage.setItem('omar_master_bands',JSON.stringify(masterBands));localStorage.setItem('omar_include_def',JSON.stringify(includeDeferredInBalance));try{window.dispatchEvent(new Event('omar_data_updated'));if(window.parent)window.parent.postMessage({type:'omar_data_updated'},'*')}catch(e){}}
+function persist(){localStorage.setItem('omar_tx_v3',JSON.stringify(transactions));localStorage.setItem('omar_master_bands',JSON.stringify(masterBands));localStorage.setItem('omar_include_def',JSON.stringify(includeDeferredInBalance));try{if(window.syncToABOmar){ _lastDataHash=''; syncToABOmar(); } if(window.parent&&window.parent.syncToABOmar)window.parent.syncToABOmar()}catch(e){}try{window.dispatchEvent(new Event('omar_data_updated'));if(window.parent)window.parent.postMessage({type:'omar_data_updated'},'*')}catch(e){}}
 function ensureMaster(){if(masterBands.length===0){masterBands=[{id:1,name:'الإيجار',section:'expense'},{id:2,name:'الكهرباء',section:'expense'},{id:3,name:'مبيعات',section:'income'},{id:4,name:'أحمد',section:'debt_due'},{id:5,name:'سامي',section:'amanat'}];}persist()}
 function getBands(sec){return masterBands.filter(b=>b.section===sec).map(b=>b.name)}
 function getMonthRange(ym){const[y,m]=ym.split('-').map(Number);const first=`${ym}-01`;const lastDay=new Date(y,m,0).getDate();const last=`${ym}-${String(lastDay).padStart(2,'0')}`;return{first,last,y,m}}
