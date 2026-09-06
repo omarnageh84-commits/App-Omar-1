@@ -399,16 +399,15 @@ let _isSyncing = false;
 
 function getAllData(){
   try{
+    let txRaw = localStorage.getItem('omar_tx_v3');
+    let txArr = [];
+    try{ txArr = txRaw ? JSON.parse(txRaw) : (window.transactions || []); }catch(e){ txArr = window.transactions || []; }
     return {
-      tx: localStorage.getItem('omar_tx_v3'),
-      bands: localStorage.getItem('omar_master_bands'),
-      fixed_templates: localStorage.getItem('omar_fixed_templates'),
-      fixed_by_month: localStorage.getItem('omar_fixed_by_month'),
-      wallets: localStorage.getItem('omar_wallets_v3'),
-      include_def: localStorage.getItem('omar_include_def'),
+      daily: txArr,
+      tx: txArr,
       ts: new Date().toISOString()
     };
-  }catch(e){ return null; }
+  }catch(e){ return {daily: []}ll; }
 }
 
 function hashData(d){
@@ -435,7 +434,6 @@ window.syncToABOmar = function(){
           mode: 'no-cors',
           headers: {'Content-Type': 'text/plain'},
           body: JSON.stringify({ daily: data.tx ? (typeof data.tx === 'string' ? JSON.parse(data.tx) : data.tx) : (window.transactions || []) })
-        })
         }).catch(e=>{});
       }
       
