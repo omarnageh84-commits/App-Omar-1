@@ -36,7 +36,9 @@ body{padding:0 6px 0 6px;min-height:100dvh;margin:0;zoom:1.16}
 <div id="frozenTop">
 <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px">
 <div style="display:flex;gap:4px;align-items:center"><div style="font-size:9px;font-weight:900">⏱️ الحضور</div><button onclick="toggleTop()" id="toggleBtn" style="background:var(--bg-soft);border:1px solid var(--card-border);padding:2px 6px;border-radius:999px;font-size:7.5px;font-weight:700;color:var(--text)">▲ إخفاء</button></div>
-<div style="display:flex;gap:2px;align-items:center"><div id="monthLabel" class="en" style="font-size:8.5px;background:var(--hero);color:#fff;padding:2px 6px;border-radius:999px;font-weight:900">9 / 2026</div><button onclick="changeMonth(-1)" style="background:var(--card);border:1px solid var(--card-border);width:21px;height:21px;border-radius:5px;font-weight:900;font-size:11px">‹</button><button onclick="changeMonth(1)" style="background:var(--card);border:1px solid var(--card-border);width:21px;height:21px;border-radius:5px;font-weight:900;font-size:11px">›</button><div id="clock" class="en" style="font-size:7.5px;background:var(--bg-soft);padding:2px 5px;border-radius:999px">00:00:00</div></div>
+<div style="display:flex;gap:2px;align-items:center">
+<button onclick="syncWithDrive()" style="background:var(--hero);color:#fff;border:none;padding:2px 8px;border-radius:999px;font-size:7.5px;font-weight:900;cursor:pointer">🔄 مزامنة</button>
+<div id="monthLabel" class="en" style="font-size:8.5px;background:var(--hero);color:#fff;padding:2px 6px;border-radius:999px;font-weight:900">9 / 2026</div><button onclick="changeMonth(-1)" style="background:var(--card);border:1px solid var(--card-border);width:21px;height:21px;border-radius:5px;font-weight:900;font-size:11px">‹</button><button onclick="changeMonth(1)" style="background:var(--card);border:1px solid var(--card-border);width:21px;height:21px;border-radius:5px;font-weight:900;font-size:11px">›</button><div id="clock" class="en" style="font-size:7.5px;background:var(--bg-soft);padding:2px 5px;border-radius:999px">00:00:00</div></div>
 </div>
 <div id="topInfo" style="margin:0;padding:0">
 <div class="stats">
@@ -69,11 +71,51 @@ body{padding:0 6px 0 6px;min-height:100dvh;margin:0;zoom:1.16}
 
 <div id="proModal" onclick="if(event.target==this)closeModal()"><div class="modal-box"><div style="padding:14px;text-align:center"><div id="modalIcon" style="width:40px;height:40px;background:#FFF1F2;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:19px">🗑️</div><div id="modalTitle" style="font-weight:900;font-size:12px;color:var(--text)">تمسح حضور اليوم ده؟</div><div id="modalDesc" style="font-size:9px;color:var(--text-soft);margin-top:3px">هيتم مسح الحضور والانصراف بس</div></div><div style="display:flex;gap:6px;padding:8px;background:var(--bg-soft);border-top:1px solid var(--card-border)"><button onclick="closeModal()" style="flex:1;background:var(--card);border:1px solid var(--card-border);padding:9px;border-radius:8px;font-weight:800;font-size:9px">إلغاء</button><button id="modalOk" onclick="confirmModal()" style="flex:1;background:#ef4444;color:#fff;border:none;padding:9px;border-radius:8px;font-weight:900;font-size:9px">مسح ✓</button></div></div></div>
 <script>
+// رابط السكربت الموحد (حط رابط الـ Web App هنا بعد ما تعمله)
+const WEB_APP_URL = "حط_رابط_الويب_اب_هنا";
+
 let modalAction=null, modalKey=null;
 function openClearModal(key){ modalAction='clear'; modalKey=key; document.getElementById('proModal').classList.add('show'); }
 function closeModal(){ document.getElementById('proModal').classList.remove('show'); modalAction=null; modalKey=null; }
 function confirmModal(){ if(modalAction==='clear'){ doClearDay(modalKey); } closeModal(); }
 let topHidden=localStorage.getItem('att_top_hidden')==='1';let curDate=new Date();let curY=curDate.getFullYear();let curM=curDate.getMonth();let activeKey=localStorage.getItem('att_active_month');if(activeKey){let p=activeKey.split('-');curY=parseInt(p[0]);curM=parseInt(p[1])-1;}let closed=JSON.parse(localStorage.getItem('att_closed')||'{}');
+
+// دالة الحفظ التلقائي في الدرايف
+function saveToDrive() {
+  if (WEB_APP_URL.includes("حط_رابط")) return;
+  let allData = {
+    attendance: JSON.parse(localStorage.getItem('att_fixed_final')||'{}'),
+    hols: JSON.parse(localStorage.getItem('att_hols_fixed')||'{}'),
+    notes: JSON.parse(localStorage.getItem('att_notes')||'{}')
+  };
+  
+  fetch(WEB_APP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fileName: "all_project_data.json", content: allData })
+  }).catch(err => console.log("خطأ في الحفظ:", err));
+}
+
+// دالة السحب من الدرايف
+function syncWithDrive() {
+  if (WEB_APP_URL.includes("حط_رابط")) {
+    alert("برجاء وضع رابط الـ Web App في كود JavaScript أولاً!");
+    return;
+  }
+  fetch(WEB_APP_URL + "?fileName=all_project_data.json")
+    .then(res => res.json())
+    .then(data => {
+      if(data && data.attendance) {
+        localStorage.setItem('att_fixed_final', JSON.stringify(data.attendance));
+        localStorage.setItem('att_hols_fixed', JSON.stringify(data.hols || {}));
+        localStorage.setItem('att_notes', JSON.stringify(data.notes || {}));
+        location.reload();
+      }
+    })
+    .catch(err => alert("فشل الاتصال بالدرايف!"));
+}
+
 function toggleTop(){ topHidden=!topHidden; localStorage.setItem('att_top_hidden',topHidden?'1':'0'); applyTop(); }
 function applyTop(){
   document.getElementById('topInfo').style.display=topHidden?'none':'block';
@@ -136,21 +178,13 @@ function renderAll(){
   renderClosedList();
   setTimeout(updateSpacer, 20);
 }
-function doClearDay(k){ data[k]={in:'',out:''}; localStorage.setItem('att_fixed_final',JSON.stringify(data)); renderAll(); }
+function doClearDay(k){ data[k]={in:'',out:''}; localStorage.setItem('att_fixed_final',JSON.stringify(data)); saveToDrive(); renderAll(); }
 function saveD(k,t,v){
   let clean=toEn(v);
   if(!data[k]) data[k]={in:'',out:''};
   data[k][t]=clean;
   localStorage.setItem('att_fixed_final',JSON.stringify(data));
-  try{
-    let atts=JSON.parse(localStorage.getItem('omar_att_v2')||'[]');
-    let parts=k.split('-');
-    let dateStr=`${parts[0]}-${String(parts[1]).padStart(2,'0')}-${String(parts[2]).padStart(2,'0')}`;
-    let type=t==='in'?'دخول':'خروج';
-    atts=atts.filter(a=>!(a.date===dateStr && a.type===type && a.source==='attendance'));
-    atts.push({id:Date.now().toString(), type:type, date:dateStr, time:clean+':00', timestamp:Date.now(), source:'attendance', key:k});
-    localStorage.setItem('omar_att_v2', JSON.stringify(atts));
-  }catch(e){}
+  saveToDrive();
   const h=calcDiff(data[k].in,data[k].out);
   const hEl=document.getElementById('h-'+k);
   if(hEl){ hEl.innerText=h?h.toFixed(2):'-'; hEl.style.color=h?'var(--hero)':''; }
@@ -172,8 +206,8 @@ function saveD(k,t,v){
   if(outEl){ outEl.classList.remove('filled','half'); if(data[k].out) outEl.classList.add(isDone?'filled':'half'); }
   calcTotals();
 }
-function saveNote(k,v){notes[k]=v;localStorage.setItem('att_notes',JSON.stringify(notes));}
-function toggleHol(k){if(hols[k]) delete hols[k]; else hols[k]=true;localStorage.setItem('att_hols_fixed',JSON.stringify(hols));renderAll();}
+function saveNote(k,v){notes[k]=v;localStorage.setItem('att_notes',JSON.stringify(notes)); saveToDrive();}
+function toggleHol(k){if(hols[k]) delete hols[k]; else hols[k]=true;localStorage.setItem('att_hols_fixed',JSON.stringify(hols)); saveToDrive(); renderAll();}
 function calcTotals(){
   let v1=parseFloat(toEn(document.getElementById('v1').value))||0;
   let v2=parseFloat(toEn(document.getElementById('v2').value))||1;
@@ -205,14 +239,7 @@ function doQuickPunch(type, now){
   if(!data[key]) data[key]={in:'',out:''};
   if(type==='in') data[key].in=simpleTime; else data[key].out=simpleTime;
   localStorage.setItem('att_fixed_final', JSON.stringify(data));
-  try{
-    let atts=JSON.parse(localStorage.getItem('omar_att_v2')||'[]');
-    let dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    let typeName=type==='in'?'دخول':'خروج';
-    atts=atts.filter(a=>!(a.date===dateStr && a.type===typeName && a.source==='attendance'));
-    atts.push({id:Date.now().toString(), type:typeName, date:dateStr, time:timeStr+':00', timestamp:Date.now(), source:'attendance', key:key});
-    localStorage.setItem('omar_att_v2', JSON.stringify(atts));
-  }catch(e){}
+  saveToDrive();
   renderAll();
   setTimeout(()=>{
     let el=document.getElementById(type==='in'?`in-${key}`:`out-${key}`);
