@@ -197,6 +197,85 @@ body{display:flex;flex-direction:column}
 <div id="hiddenCodeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)"><div style="background:var(--card);width:100%;max-width:340px;border-radius:20px;padding:18px;border:1.5px solid var(--card-border)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><b style="font-size:13px">🔒 إعدادات المخفي</b><button onclick="closeHiddenCodeModal()" style="border:none;background:var(--bg-soft);width:30px;height:30px;border-radius:8px">✕</button></div><div style="background:#111;color:#fff;border-radius:12px;padding:12px;margin-bottom:12px"><div style="font-size:9px;opacity:.7">الكود الحالي</div><div id="hiddenCurrentCode" style="font-size:18px;font-weight:900;letter-spacing:2px;margin-top:4px">****</div><div style="font-size:8px;opacity:.6;margin-top:6px">اضغط على العين عشان تظهره</div></div><div style="display:flex;gap:6px;margin-bottom:10px"><input id="hiddenNewCodeInput" placeholder="الكود الجديد" type="password" class="input-pro" style="flex:1;font-size:16px;letter-spacing:2px"><button onclick="toggleHiddenCodeEye()" style="border:1.5px solid var(--card-border);background:var(--bg-soft);border-radius:10px;padding:8px 12px">👁️</button></div><div style="display:flex;gap:8px"><button onclick="closeHiddenCodeModal()" style="flex:1;background:var(--bg-soft);border:1.5px solid var(--card-border);border-radius:12px;padding:11px;font-weight:800">إلغاء</button><button onclick="saveHiddenCodeInside()" style="flex:1;background:#111;color:#fff;border:none;border-radius:12px;padding:11px;font-weight:900">💾 حفظ الكود</button></div><div style="font-size:8px;color:var(--text-soft);margin-top:10px;text-align:center">💡 الكود ده بس اللي بيفتح المخفي، محدش هيشوفه بره</div></div></div>
 <div id="toastContainer"></div>
 <script>
+// إعدادات المزامنة مع جوجل درايف (ملف واحد موحد لجميع البيانات)
+const DRIVE_CONFIG = {
+  FILE_NAME: 'all_project_data.json',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxfkSOK4vwGDLE4_AkZTkyjJYV8Tvhl8Qmi5hkH8PUVFsvt80_YxbVdd5_lUt2QPqK3/exec',
+  DEBOUNCE: 1500
+};
+
+let _lastDataHash = '';
+let _debounceTimer = null;
+let _isSyncing = false;
+
+function getAllData(){
+  try{
+    let txRaw = localStorage.getItem('omar_tx_v3');
+    let tasksRaw = localStorage.getItem('omar_tasks_v1');
+    let catsRaw = localStorage.getItem('omar_cats_v1');
+    let attRaw = localStorage.getItem('att_fixed_final');
+    
+    return {
+      daily: txRaw ? JSON.parse(txRaw) : [],
+      tasks: tasksRaw ? JSON.parse(tasksRaw) : [],
+      cats: catsRaw ? JSON.parse(catsRaw) : [],
+      attendance: attRaw ? JSON.parse(attRaw) : {},
+      ts: new Date().toISOString()
+    };
+  }catch(e){ return {daily: [], tasks: [], cats: [], attendance: {}}; }
+}
+
+function hashData(d){
+  try{ return JSON.stringify(d).length + '_' + (d.tasks ? d.tasks.length : 0); }catch(e){ return ''; }
+}
+
+async function loadFromDrive(force=false){
+  try{
+    const res = await fetch(DRIVE_CONFIG.APPS_SCRIPT_URL + '?fileName=all_project_data.json&t=' + Date.now());
+    const data = await res.json();
+    if(data){
+      if(data.tasks && Array.isArray(data.tasks) && data.tasks.length > 0){
+        localStorage.setItem('omar_tasks_v1', JSON.stringify(data.tasks));
+        tasks = data.tasks;
+      }
+      if(data.cats && Array.isArray(data.cats) && data.cats.length > 0){
+        localStorage.setItem('omar_cats_v1', JSON.stringify(data.cats));
+        cats = data.cats;
+      }
+      renderManagerLists();
+      render();
+    }
+  }catch(e){}
+}
+loadFromDrive();
+
+window.syncToABOmar = function(){
+  if(_debounceTimer) clearTimeout(_debounceTimer);
+  _debounceTimer = setTimeout(async ()=>{
+    if(_isSyncing) return;
+    let data = getAllData();
+    if(!data) return;
+    let h = hashData(data);
+    if(h === _lastDataHash) return;
+    _lastDataHash = h;
+    
+    _isSyncing = true;
+    try{
+      if(DRIVE_CONFIG.APPS_SCRIPT_URL){
+        await fetch(DRIVE_CONFIG.APPS_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {'Content-Type': 'text/plain'},
+          body: JSON.stringify({ fileName: "all_project_data.json", content: data })
+        }).catch(e=>{});
+      }
+    }catch(e){
+    }finally{
+      _isSyncing = false;
+    }
+  }, DRIVE_CONFIG.DEBOUNCE);
+};
+
 let cats = JSON.parse(localStorage.getItem('omar_cats_v1')||'[{"id":1,"emoji":"📌","name":"عام"},{"id":2,"emoji":"🏠","name":"البيت"},{"id":3,"emoji":"💼","name":"الشغل"}]');
 let tasks = JSON.parse(localStorage.getItem('omar_tasks_v1')||'[]');
 let curFilter='الكل';
@@ -210,7 +289,11 @@ let camStream=null;
 let mediaRecorder=null,recChunks=[];
 
 function showToast(t,s=''){let c=document.getElementById('toastContainer');let d=document.createElement('div');d.className='toast-pro';d.innerHTML=`<b style="font-size:11px">${t}</b><small>${s}</small>`;c.appendChild(d);setTimeout(()=>d.remove(),2500);}
-function saveLS(){localStorage.setItem('omar_cats_v1',JSON.stringify(cats));localStorage.setItem('omar_tasks_v1',JSON.stringify(tasks));}
+function saveLS(){
+  localStorage.setItem('omar_cats_v1',JSON.stringify(cats));
+  localStorage.setItem('omar_tasks_v1',JSON.stringify(tasks));
+  try{ if(window.syncToABOmar) syncToABOmar(); }catch(e){}
+}
 function getProgress(t){if(!t.subs||!t.subs.length) return t.done?100:0; return Math.round(t.subs.filter(s=>s.done).length/t.subs.length*100);}
 function renderFilters(){
   let row=document.getElementById('filterRow');if(!row)return;
@@ -225,19 +308,16 @@ function renderFilters(){
     htmlChips+=`<button class="filter-chip hidden-active ${curFilter==='مخفي'?'active':''}" onclick="setFilter('مخفي')">🔒 مخفي ${cnt?`(${cnt})`:''}</button>`;
   }
   row.innerHTML=htmlChips;
-  // حفظ اختيار الفئة الحالي قبل إعادة البناء
   let sel=document.getElementById('mCat');
   let prevVal=sel? sel.value : null;
   if(sel){
     sel.innerHTML=cats.map(c=>`<option value="${c.name}">${c.emoji} ${c.name}</option>`).join('')+`<option value="مخفي">🔒 مخفي</option>`;
     if(prevVal && [...sel.options].some(o=>o.value===prevVal)) sel.value=prevVal;
-    // لو احنا جوه المخفي ولسه بنعدل مهمة مخفية، اجبر الاختيار يبقى مخفي
     if(curFilter==='مخفي' && editingId){
       let t=tasks.find(x=>x.id===editingId);
       if(t && (t.cat||'').trim()==='مخفي') sel.value='مخفي';
     }
   }
-  /* كود المخفي مخفي عن الإعدادات الخارجية */
 }
 function setFilter(n){
   if(n==='مخفي'){
@@ -301,7 +381,6 @@ function render(){
   let board=document.getElementById('board');
   let q=(document.getElementById('search')?.value||'').trim().toLowerCase();
   let list=[...tasks];
-  // تنظيف: المخفي لا يظهر أبدا إلا في تبويبه
   if(curFilter==='الكل'){
     list=list.filter(t=> (t.cat||'').trim() !== 'مخفي');
   }else if(curFilter==='منتهي'){
@@ -365,7 +444,6 @@ function quickAdd(v){
   saveLS();render();
   document.getElementById('search').value='';
   showToast(targetCat==='مخفي'?'مضافة في المخفي 🔒':'تمت الإضافة ✅',targetCat);
-  // مش بنفتحها تلقائي - تظهر في القايمة وانت تفتحها بإيدك
 }
 function openModal(){
   editingId=null;curSubs=[];curMedia={images:[],audios:[]};curTable={cols:['الصنف','العدد','السعر'],rows:[['','','']]};
@@ -429,7 +507,7 @@ function renderSubs(){
   el.innerHTML=curSubs.map((s,i)=>`<div style="display:flex;gap:6px;align-items:center;background:var(--bg-soft);border:1.5px solid var(--card-border);border-radius:10px;padding:8px"><input type="checkbox" ${s.done?'checked':''} onchange="curSubs[${i}].done=this.checked;updateSubProgress();autoSaveSubs()"><input value="${s.text||''}" oninput="curSubs[${i}].text=this.value;autoSaveSubs()" class="input-pro" style="flex:1;padding:6px;font-size:11px"><button onclick="curSubs.splice(${i},1);renderSubs();updateSubProgress();autoSaveSubs()" style="border:none;background:#FEE2E2;width:28px;height:28px;border-radius:7px;color:#ef4444">✕</button></div>`).join('');
   updateSubProgress();
 }
-function autoSaveSubs(){if(!editingId)return;let t=tasks.find(x=>x.id===editingId);if(!t)return;t.subs=[...curSubs];saveLS(); /* render بدون ما يبوظ الاختيار */ let boardOnly=true; if(boardOnly){ let oldFilter=curFilter; renderBoardOnly(); } else render(); }
+function autoSaveSubs(){if(!editingId)return;let t=tasks.find(x=>x.id===editingId);if(!t)return;t.subs=[...curSubs];saveLS();let boardOnly=true; if(boardOnly){ let oldFilter=curFilter; renderBoardOnly(); } else render(); }
 function updateSubProgress(){let total=curSubs.length;let done=curSubs.filter(s=>s.done).length;let pct=total?Math.round(done/total*100):0;let bar=document.getElementById('subProgBar');let txt=document.getElementById('subProgText');if(bar)bar.style.width=pct+'%';if(txt)txt.textContent=pct+'%';}
 function addSub(){let inp=document.getElementById('newSub');if(!inp.value.trim())return;curSubs.push({text:inp.value.trim(),done:false});inp.value='';renderSubs();autoSaveSubs();}
 let savedRange=null;
@@ -494,9 +572,7 @@ function openColorPicker(m){
 function applyColor(col){
   let ed=document.getElementById('richEditor');
   ed.focus();
-  // نرجع التحديد
   if(!restoreSel()){
-    // لو مفيش تحديد محفوظ، نحدد كل النص أو نطبق على المؤشر
     let sel=window.getSelection();
     if(sel.rangeCount===0){
       let range=document.createRange();
@@ -505,16 +581,13 @@ function applyColor(col){
       sel.addRange(range);
     }
   }
-  // نطبق اللون
   if(colorMode==='text'){
-    // طريقة حديثة بدون execCommand لو فشل
     try{
       document.execCommand('foreColor',false,col);
     }catch(e){
       document.execCommand('styleWithCSS',false,true);
       document.execCommand('foreColor',false,col);
     }
-    // fallback يدوي لو لسه مش شغال
     let sel=window.getSelection();
     if(sel && !sel.isCollapsed){
       let range=sel.getRangeAt(0);
@@ -523,12 +596,10 @@ function applyColor(col){
       try{
         range.surroundContents(span);
       }catch(e){
-        // لو مقدرش يعمل surround بسبب تقاطع
         let frag=range.extractContents();
         span.appendChild(frag);
         range.insertNode(span);
       }
-      // نحرك المؤشر بعد الـ span
       range.setStartAfter(span);
       range.collapse(true);
       sel.removeAllRanges();
@@ -567,11 +638,9 @@ function applyColor(col){
 function clearAllNotes(){
   let ed=document.getElementById('richEditor');
   if(!ed) return;
-  // مسح فوري بدون confirm عشان الموبايل
   ed.innerHTML='';
   ed.textContent='';
   ed.focus();
-  // نحط سطر فاضي عشان المؤشر يظهر
   setTimeout(()=>{
     ed.innerHTML='<br>';
     let range=document.createRange();
@@ -585,11 +654,6 @@ function clearAllNotes(){
   showToast('تم مسح كل الملاحظات ✅');
   saveSel();
 }
-function clearAllFormatting(){
-  // ده للتوافق القديم - بقى يمسح كله
-  clearAllNotes();
-}
-// حفظ الـ selection كل ما المستخدم يكتب أو يحدد
 document.addEventListener('selectionchange',()=>{
   let sel=window.getSelection();
   if(sel && sel.rangeCount>0){
@@ -614,15 +678,9 @@ function stopRec(){if(mediaRecorder&&mediaRecorder.state==='recording')mediaReco
 function parseCellValue(v){
   if(!v) return 0;
   let s=v.toString().trim();
-  // لو معادلة تبدأ بـ =
   if(s.startsWith('=')){
     try{
-      // استبدال مرجع الأعمدة مثل A*B أو A1*B1 - نبسطها: لو كتب =العدد*السعر نحسبها
       let expr=s.slice(1);
-      // اسمح فقط أرقام وعمليات
-      // لو فيه حروف عربية، نحاول نفهمها كأسماء أعمدة
-      // نستبدل أسماء الأعمدة بقيم الصف الحالي في سياق calc
-      // هنا هنرجع 0 والقيمة هتتحسب في render
       return {isFormula:true, expr:expr};
     }catch(e){ return 0; }
   }
@@ -631,19 +689,13 @@ function parseCellValue(v){
 }
 function evalFormula(expr, row, colIdx){
   try{
-    // expr مثل "2*3" أو "A*B" - نحول A,B,C لأرقام من الصف
     let clean=expr;
-    // استبدال أسماء الأعمدة الشائعة
     curTable.cols.forEach((colName, idx)=>{
       let val=parseFloat((row[idx]||'').toString().replace(/[^0-9.-]/g,''))||0;
-      // استبدال اسم العمود
       clean=clean.split(colName).join(val);
-      // استبدال حرف العمود A,B,C
       let letter=String.fromCharCode(65+idx);
-      // لا نستبدل داخل أرقام
       clean=clean.replace(new RegExp('\\b'+letter+'\\b','g'), val);
     });
-    // فقط عمليات حسابية مسموحة
     if(!/^[0-9+\-*/().\s]+$/.test(clean)) return 0;
     return Function('"use strict";return ('+clean+')')();
   }catch(e){ return 0; }
@@ -651,14 +703,11 @@ function evalFormula(expr, row, colIdx){
 function renderTable(){
   let head=document.getElementById('tableHead');let body=document.getElementById('tableBody');let foot=document.getElementById('tableFoot');let calcColSel=document.getElementById('calcCol');
   if(!head) return;
-  // header احترافي
   head.innerHTML='<tr style="background:var(--bg-soft)">'+curTable.cols.map((c,i)=>`<th style="padding:10px 8px;font-size:10px;border:1px solid var(--card-border);text-align:center;position:relative"><span style="display:block;font-weight:900">${c}</span><span style="font-size:7px;color:var(--text-soft)">${String.fromCharCode(65+i)}</span><span onclick="delCol(${i})" style="position:absolute;top:2px;left:2px;color:#ef4444;cursor:pointer;background:#FFF1F2;width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px">✕</span></th>`).join('')+'<th style="border:none;background:transparent;width:30px"></th></tr>';
-  // body
   body.innerHTML=curTable.rows.map((r,ri)=>{
     return '<tr>'+r.map((cell,ci)=>{
       let isNum=!isNaN(parseFloat((cell||'').toString().replace(/[^0-9.-]/g,''))) && cell && !cell.toString().startsWith('=');
       let displayCell=cell||'';
-      // لو معادلة، نحسبها ونعرض النتيجة
       if(displayCell.toString().startsWith('=')){
         let res=evalFormula(displayCell.slice(1), r, ci);
         return `<td style="border:1px solid var(--card-border);background:#f0fdf4;position:relative"><input value="${displayCell}" oninput="curTable.rows[${ri}][${ci}]=this.value;renderTable()" style="width:100%;border:none;padding:8px 8px 14px 8px;background:transparent;outline:none;font-size:11px;font-family:monospace" placeholder="=..." title="معادلة"><span style="position:absolute;bottom:1px;right:4px;font-size:8px;color:#16a34a;font-weight:900">= ${res}</span></td>`;
@@ -666,7 +715,6 @@ function renderTable(){
       return `<td style="border:1px solid var(--card-border);${isNum?'background:#fffbeb':''}"><input value="${displayCell}" oninput="curTable.rows[${ri}][${ci}]=this.value;calcFoot()" style="width:100%;border:none;padding:9px 8px;background:transparent;outline:none;font-size:11px" placeholder="-"></td>`;
     }).join('')+`<td style="border:none;background:transparent"><button onclick="curTable.rows.splice(${ri},1);renderTable()" style="border:none;background:#FEE2E2;width:26px;height:26px;border-radius:7px;color:#ef4444;font-size:12px">✕</button></td></tr>`;
   }).join('');
-  // calcCol select
   if(calcColSel){
     calcColSel.innerHTML=curTable.cols.map((c,i)=>`<option value="${i}">${c} (${String.fromCharCode(65+i)})</option>`).join('');
   }
@@ -697,7 +745,6 @@ function calcFoot(){
     return {sum, mul, has, min:has?min:0, max:has?max:0, count, avg:has?sum/count:0};
   });
   foot.innerHTML='<tr style="background:var(--bg-soft)">'+sums.map(s=>`<td style="padding:8px 4px;text-align:center;border:1px solid var(--card-border);font-size:10px"><div style="color:var(--text-soft);font-size:7px">مجموع</div><div style="font-weight:900;color:var(--hero);font-size:11px">${s.has? s.sum.toFixed(2).replace(/\.00$/,'') : ''}</div></td>`).join('')+'<td style="border:none"></td></tr>';
-  // ملخص
   if(summary && summaryContent){
     let hasNum=sums.some(s=>s.has);
     if(hasNum){
@@ -804,8 +851,7 @@ function clearAllData(){
   closeManager();
   showToast('تم مسح كل البيانات - بتبدأ من جديد ✅');
 }
-function renderManagerLists(){let sel=document.getElementById('mCat');if(sel)sel.innerHTML=cats.map(c=>`<option value="${c.name}">${c.emoji} ${c.name}</option>`).join('')+`<option value="مخفي">🔒 مخفي</option>`;let list=document.getElementById('catList');if(list)list.innerHTML=cats.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg-soft);padding:7px 9px;border-radius:8px;margin-bottom:5px;border:1px solid var(--card-border)"><div style="font-size:10px">${c.emoji} <b>${c.name}</b></div><button onclick="delCat(${c.id})" style="border:none;background:#FEE2E2;width:25px;height:25px;border-radius:6px;color:#ef4444">✕</button></div>`).join('');/* كود المخفي مخفي عن الإعدادات الخارجية */}
-function saveHiddenCode(){ /* تم نقله جوه المخفي */ }
+function renderManagerLists(){let sel=document.getElementById('mCat');if(sel)sel.innerHTML=cats.map(c=>`<option value="${c.name}">${c.emoji} ${c.name}</option>`).join('')+`<option value="مخفي">🔒 مخفي</option>`;let list=document.getElementById('catList');if(list)list.innerHTML=cats.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg-soft);padding:7px 9px;border-radius:8px;margin-bottom:5px;border:1px solid var(--card-border)"><div style="font-size:10px">${c.emoji} <b>${c.name}</b></div><button onclick="delCat(${c.id})" style="border:none;background:#FEE2E2;width:25px;height:25px;border-radius:6px;color:#ef4444">✕</button></div>`).join('');}
 function toggleCustomRepeat(){let sel=document.getElementById('remRepeat');let c=document.getElementById('customRepeat');if(!sel||!c)return;c.style.display=sel.value==='custom'?'flex':'none';}
 let customSoundData=null;
 function handleCustomSound(files){
@@ -820,7 +866,6 @@ function handleCustomSound(files){
     if(nameEl){ nameEl.style.display='block'; nameEl.textContent='✅ تم اختيار: '+file.name; }
     document.querySelector('input[name="remSound"][value="custom"]').checked=true;
     showToast('تم تحميل النغمة: '+file.name);
-    // حفظها في المهمة الحالية
     if(editingId){
       let t=tasks.find(x=>x.id===editingId);
       if(t){ t.customSound=customSoundData; t.customSoundName=file.name; saveLS(); }
