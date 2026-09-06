@@ -414,6 +414,46 @@ function hashData(d){
   try{ return JSON.stringify(d).length + '_' + (d.tx ? d.tx.length : 0); }catch(e){ return ''; }
 }
 
+
+// ===== IMPORT FROM DRIVE - يرجع البيانات لو الكاش اتمسح =====
+async function loadFromDrive(){
+  try{
+    console.log('🔄 بيحاول يسترجع من الدرايف...');
+    const res = await fetch(DRIVE_CONFIG.APPS_SCRIPT_URL + '?t=' + Date.now());
+    const data = await res.json();
+    console.log('📥 اللي جاي من الدرايف:', data);
+    
+    if(data && data.daily && Array.isArray(data.daily) && data.daily.length > 0){
+      let localRaw = localStorage.getItem('omar_tx_v3');
+      let localArr = [];
+      try{ localArr = localRaw ? JSON.parse(localRaw) : []; }catch(e){ localArr = []; }
+      
+      // لو المحلي فاضي والدرايف فيه بيانات -> رجعها
+      if(localArr.length === 0){
+        console.log('✅ المحلي فاضي - بيرجع ' + data.daily.length + ' معاملة من الدرايف');
+        localStorage.setItem('omar_tx_v3', JSON.stringify(data.daily));
+        if(window.transactions !== undefined) window.transactions = data.daily;
+        // اعمل ريلود عشان الجداول تتملي
+        setTimeout(()=>{ location.reload(); }, 500);
+        return true;
+      } else {
+        console.log('ℹ️ المحلي فيه ' + localArr.length + ' - مش هيرجع من الدرايف');
+      }
+    } else {
+      console.log('ℹ️ الدرايف فاضي - مفيش حاجة ترجع');
+    }
+  }catch(e){
+    console.warn('⚠️ فشل الاسترجاع من الدرايف:', e);
+  }
+  return false;
+}
+
+// شغل الاسترجاع أول ما الصفحة تفتح - قبل ما أي حاجة تحمل
+loadFromDrive();
+
+window.restoreFromDriveManual = loadFromDrive; // تقدر تناديها من الكونسول
+
+
 window.syncToABOmar = function(){
   if(_debounceTimer) clearTimeout(_debounceTimer);
   _debounceTimer = setTimeout(async ()=>{
