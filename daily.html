@@ -397,61 +397,92 @@ let _lastDataHash = '';
 let _debounceTimer = null;
 let _isSyncing = false;
 
+
 function getAllData(){
   try{
     let txRaw = localStorage.getItem('omar_tx_v3');
     let txArr = [];
     try{ txArr = txRaw ? JSON.parse(txRaw) : (window.transactions || []); }catch(e){ txArr = window.transactions || []; }
+    
+    // البنود الثابتة
+    let fixedRaw = localStorage.getItem('omar_fixed_templates');
+    let fixedByMonthRaw = localStorage.getItem('omar_fixed_by_month');
+    let fixedTemplates = [];
+    let fixedByMonth = {};
+    try{ fixedTemplates = fixedRaw ? JSON.parse(fixedRaw) : []; }catch(e){ fixedTemplates = []; }
+    try{ fixedByMonth = fixedByMonthRaw ? JSON.parse(fixedByMonthRaw) : {}; }catch(e){ fixedByMonth = {}; }
+    
     return {
       daily: txArr,
       tx: txArr,
+      fixed_templates: fixedTemplates,
+      fixed_by_month: fixedByMonth,
       ts: new Date().toISOString()
     };
-  }catch(e){ return {daily: []}; }
+  }catch(e){ return {daily: [], fixed_templates: [], fixed_by_month: {}}; }
 }
+
 
 function hashData(d){
   try{ return JSON.stringify(d).length + '_' + (d.tx ? d.tx.length : 0); }catch(e){ return ''; }
 }
 
 
+
 // ===== IMPORT FROM DRIVE - يرجع البيانات لو الكاش اتمسح =====
-async function loadFromDrive(){
+
+async function loadFromDrive(force=false){
   try{
-    console.log('🔄 بيحاول يسترجع من الدرايف...');
+    console.log('🔄 بيحاول يسترجع من الدرايف...' + (force ? ' (فرض)' : ''));
     const res = await fetch(DRIVE_CONFIG.APPS_SCRIPT_URL + '?t=' + Date.now());
     const data = await res.json();
     console.log('📥 اللي جاي من الدرايف:', data);
     
-    if(data && data.daily && Array.isArray(data.daily) && data.daily.length > 0){
+    let restored = 0;
+    if(data && data.daily && Array.isArray(data.daily)){
       let localRaw = localStorage.getItem('omar_tx_v3');
       let localArr = [];
       try{ localArr = localRaw ? JSON.parse(localRaw) : []; }catch(e){ localArr = []; }
-      
-      // لو المحلي فاضي والدرايف فيه بيانات -> رجعها
-      if(localArr.length === 0){
-        console.log('✅ المحلي فاضي - بيرجع ' + data.daily.length + ' معاملة من الدرايف');
+      if(localArr.length === 0 || force || data.daily.length > localArr.length){
         localStorage.setItem('omar_tx_v3', JSON.stringify(data.daily));
         if(window.transactions !== undefined) window.transactions = data.daily;
-        // اعمل ريلود عشان الجداول تتملي
-        setTimeout(()=>{ location.reload(); }, 500);
-        return true;
-      } else {
-        console.log('ℹ️ المحلي فيه ' + localArr.length + ' - مش هيرجع من الدرايف');
+        restored += data.daily.length;
+        console.log('✅ رجع اليومية: ' + data.daily.length);
       }
+    }
+    // رجع الثابت
+    if(data && data.fixed_templates && Array.isArray(data.fixed_templates)){
+      if(data.fixed_templates.length > 0){
+        localStorage.setItem('omar_fixed_templates', JSON.stringify(data.fixed_templates));
+        console.log('✅ رجع البنود الثابتة: ' + data.fixed_templates.length);
+        restored++;
+      }
+    }
+    if(data && data.fixed_by_month){
+      if(Object.keys(data.fixed_by_month).length > 0){
+        localStorage.setItem('omar_fixed_by_month', JSON.stringify(data.fixed_by_month));
+        console.log('✅ رجع بنود الشهور');
+        restored++;
+      }
+    }
+    
+    if(restored > 0){
+      console.log('✅ تم الاسترجاع - بيعمل Reload...');
+      setTimeout(()=>{ location.reload(); }, 800);
+      return true;
     } else {
-      console.log('ℹ️ الدرايف فاضي - مفيش حاجة ترجع');
+      console.log('ℹ️ مفيش حاجة جديدة ترجع - المحلي فيه بيانات. لو عايز غصب: await loadFromDrive(true)');
     }
   }catch(e){
-    console.warn('⚠️ فشل الاسترجاع من الدرايف:', e);
+    console.warn('⚠️ فشل الاسترجاع:', e);
   }
   return false;
 }
-
-// شغل الاسترجاع أول ما الصفحة تفتح - قبل ما أي حاجة تحمل
 loadFromDrive();
+window.loadFromDrive = loadFromDrive;
+window.restoreFromDriveManual = loadFromDrive;
 
-window.restoreFromDriveManual = loadFromDrive; // تقدر تناديها من الكونسول
+ // تقدر تناديها من الكونسول
 
 
 window.syncToABOmar = function(){
@@ -473,7 +504,7 @@ window.syncToABOmar = function(){
           method: 'POST',
           mode: 'no-cors',
           headers: {'Content-Type': 'text/plain'},
-          body: JSON.stringify({ daily: data.tx ? (typeof data.tx === 'string' ? JSON.parse(data.tx) : data.tx) : (window.transactions || []) })
+          body: JSON.stringify(getAllData())
         }).catch(e=>{});
       }
       
