@@ -71,8 +71,8 @@ body{padding:0 6px 0 6px;min-height:100dvh;margin:0;zoom:1.16}
 
 <div id="proModal" onclick="if(event.target==this)closeModal()"><div class="modal-box"><div style="padding:14px;text-align:center"><div id="modalIcon" style="width:40px;height:40px;background:#FFF1F2;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:19px">🗑️</div><div id="modalTitle" style="font-weight:900;font-size:12px;color:var(--text)">تمسح حضور اليوم ده؟</div><div id="modalDesc" style="font-size:9px;color:var(--text-soft);margin-top:3px">هيتم مسح الحضور والانصراف بس</div></div><div style="display:flex;gap:6px;padding:8px;background:var(--bg-soft);border-top:1px solid var(--card-border)"><button onclick="closeModal()" style="flex:1;background:var(--card);border:1px solid var(--card-border);padding:9px;border-radius:8px;font-weight:800;font-size:9px">إلغاء</button><button id="modalOk" onclick="confirmModal()" style="flex:1;background:#ef4444;color:#fff;border:none;padding:9px;border-radius:8px;font-weight:900;font-size:9px">مسح ✓</button></div></div></div>
 <script>
-// رابط السكربت الموحد (حط رابط الـ Web App هنا بعد ما تعمله)
-const WEB_APP_URL = "حط_رابط_الويب_اب_هنا";
+// تم تحديث رابط الـ Web App الموحد الجديد
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxfkSOK4vwGDLE4_AkZTkyjJYV8Tvhl8Qmi5hkH8PUVFsvt80_YxbVdd5_lUt2QPqK3/exec";
 
 let modalAction=null, modalKey=null;
 function openClearModal(key){ modalAction='clear'; modalKey=key; document.getElementById('proModal').classList.add('show'); }
