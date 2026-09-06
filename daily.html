@@ -53,6 +53,7 @@ window.toggleTheme = function(){
 
 
 if(typeof dayFilter === 'undefined'){
+  var globalSearchQuery = ''; window.globalSearchQuery = window.globalSearchQuery || '';
   var dayFilter = {expense:'month', income:'month', debt:'month', amanat:'month'};
 }
 
@@ -95,9 +96,9 @@ function renderSimple(type){
         if(!t.date || !t.date.startsWith(curYM)) return false;
       }
       // global search
-      if(globalSearchQuery){
+      if(typeof globalSearchQuery !== 'undefined' && globalSearchQuery){
         let hay2=[t.item||'', t.person||'', t.wallet||'', t.note||'', t.amount||'', t.date||''].join(' ').toLowerCase();
-        if(!hay2.includes(globalSearchQuery)) return false;
+        if(!hay2.includes((typeof globalSearchQuery !== 'undefined' ? globalSearchQuery : ''))) return false;
       }
       return true;
     });
@@ -136,9 +137,9 @@ function renderDebt(){
       if(dayFilter['debt']==='month'){
         if(!t.date || !t.date.startsWith(curYM)) return false;
       }
-      if(globalSearchQuery){
+      if(typeof globalSearchQuery !== 'undefined' && globalSearchQuery){
         let hay2=[t.person||'', t.item||'', t.wallet||'', t.note||''].join(' ').toLowerCase();
-        if(!hay2.includes(globalSearchQuery)) return false;
+        if(!hay2.includes((typeof globalSearchQuery !== 'undefined' ? globalSearchQuery : ''))) return false;
       }
       return true;
     };
@@ -479,6 +480,31 @@ async function loadFromDrive(force=false){
   return false;
 }
 loadFromDrive();
+
+// helper: اعرض كل المعاملات في الكونسول
+window.showAllTx = function(){
+  try{
+    const tx = JSON.parse(localStorage.getItem('omar_tx_v3')||'[]');
+    console.table(tx);
+    console.log('عدد المعاملات:', tx.length);
+    if(tx.length>0) console.log('تواريخها:', tx.map(t=>t.date||t.day||t.d||'بدون تاريخ'));
+    return tx;
+  }catch(e){ console.log('مفيش'); return []; }
+};
+// لو الشهر الحالي فاضي وفيه معاملات في شهور تانية - بدل للشهر اللي فيه بيانات
+setTimeout(()=>{
+  try{
+    const tx = JSON.parse(localStorage.getItem('omar_tx_v3')||'[]');
+    if(tx.length>0){
+      // شوف لو الشاشة بتقول فاضي
+      const emptyEl = document.body.innerText.includes('مفيش بيانات للشهر ده');
+      if(emptyEl){
+        console.log('⚠️ الشهر الحالي فاضي لكن فيه ' + tx.length + ' معاملة في شهور تانية. اكتب showAllTx() عشان تشوفهم');
+      }
+    }
+  }catch(e){}
+}, 2000);
+
 window.loadFromDrive = loadFromDrive;
 window.restoreFromDriveManual = loadFromDrive;
 
