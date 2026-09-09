@@ -1,6 +1,7 @@
-const CACHE='app-omar-v16-json-only';
-const ASSETS=['./','./index.html','./daily.html','./attendance.html','./tasks.html','./themes.js','./manifest.json','./icon_192.png','./icon_512.png'];
+const CACHE='app-omar-v19-mobile-fix';
+const ASSETS=['./','./manifest.json','./icon_192.png','./icon_512.png'];
 
+// لا تعمل cache لـ daily و index عشان الموبايل ياخد الجديد فورا
 self.addEventListener('install',e=>{
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).catch(()=>{}));
@@ -14,7 +15,11 @@ self.addEventListener('activate',e=>{
 
 self.addEventListener('fetch',e=>{
   const url = e.request.url;
-  if(url.includes('themes.js') || url.includes('script.google.com') || url.includes('script.googleusercontent.com') || url.includes('googleapis.com') || url.includes('drive.google.com')) return;
+  // اي حاجة تبع جوجل او الثيمات او اليومية متعملهاش cache - network first
+  if(url.includes('daily.html') || url.includes('index.html') || url.includes('themes.js') || url.includes('drive.js') || url.includes('script.google.com') || url.includes('script.googleusercontent.com') || url.includes('googleapis.com')){
+    e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(r=>{
       if(r) return r;

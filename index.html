@@ -2,58 +2,49 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="favicon.ico" type="image/x-icon">
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<link rel="manifest" href="manifest.json?v=19">
 <meta name="theme-color" content="#0F766E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{ --bg:#F0FDFA; --bg-soft:#CCFBF1; --card:#FFFFFF; --card-border:#5EEAD4; --text:#134E4A; --text-soft:#0D9488; --primary:#0F766E; --hero:#0F766E; --accent:#14B8A6; --nav-bg: rgba(255,255,255,0.92); }
-*{box-sizing:border-box;margin:0;padding:0;font-family:'IBM Plex Sans Arabic',sans-serif}
-html,body{height:100%;background:var(--bg);overflow:hidden}
+:root{ --bg:#F0FDFA; --bg-soft:#CCFBF1; --card:#FFFFFF; --card-border:#5EEAD4; --text:#134E4A; --text-soft:#0D9488; --hero:#0F766E; --nav-bg: rgba(255,255,255,0.92); }
+*{box-sizing:border-box;margin:0;padding:0;font-family:'IBM Plex Sans Arabic',sans-serif;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);overflow:hidden;overscroll-behavior:none}
 body{display:flex;justify-content:center;align-items:flex-start;background:var(--bg);}
-.phone-shell{
-  width:100%; max-width:430px; height:100dvh; background:var(--bg);
-  position:relative; overflow:hidden; box-shadow:0 0 0 1px var(--card-border), 0 25px 80px -20px rgba(0,0,0,.4);
-  display:flex; flex-direction:column;
-}
-@media(min-width:500px){
-  .phone-shell{ margin-top:12px; height:calc(100dvh - 24px); border-radius:28px; border:8px solid #111; }
-}
-.header{height:56px; background:var(--card); border-bottom:1.5px solid var(--card-border); display:flex; align-items:center; justify-content:space-between; padding:0 14px; flex-shrink:0}
-.header b{font-size:14px; font-weight:800; color:var(--text)}
-.theme-toggle{width:42px; height:28px; background:var(--bg-soft); border:1.5px solid var(--card-border); border-radius:99px; position:relative; cursor:pointer; display:flex; align-items:center; padding:2px; transition:.25s}
-.theme-toggle .knob{width:22px; height:22px; background:var(--hero); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; transition:.25s; transform:translateX(0)}
+.phone-shell{ width:100%; max-width:430px; height:100dvh; height:100svh; background:var(--bg); position:relative; overflow:hidden; display:flex; flex-direction:column; }
+@media(min-width:500px){ .phone-shell{ margin-top:12px; height:calc(100dvh - 24px); border-radius:28px; border:8px solid #111; box-shadow:0 0 0 1px var(--card-border), 0 25px 80px -20px rgba(0,0,0,.4); } }
+.header{height:56px; background:var(--card); border-bottom:1.5px solid var(--card-border); display:flex; align-items:center; justify-content:space-between; padding:0 14px; flex-shrink:0; padding-top:env(safe-area-inset-top)}
+.theme-toggle{width:42px; height:28px; background:var(--bg-soft); border:1.5px solid var(--card-border); border-radius:99px; position:relative; cursor:pointer; display:flex; align-items:center; padding:2px}
+.theme-toggle .knob{width:22px; height:22px; background:var(--hero); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; transition:.25s}
 .theme-toggle.dark .knob{transform:translateX(-12px); background:#1E293B}
 .pageWrap{flex:1;position:relative;background:var(--bg);overflow:hidden}
-.page{position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;pointer-events:none;transition:opacity .22s;background:var(--bg)}
+.page{position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;pointer-events:none;transition:opacity .22s;background:var(--bg);-webkit-overflow-scrolling:touch}
 .page.active{opacity:1;pointer-events:auto;z-index:2}
-.nav{
-  height:72px; margin:10px; background:var(--nav-bg); backdrop-filter:blur(24px) saturate(200%);
-  border:1.5px solid var(--card-border); border-radius:20px; display:flex;align-items:center;padding:6px;gap:5px;z-index:10;
-  box-shadow: 0 10px 30px -12px rgba(0,0,0,.15);
-}
-.nav button{flex:1;height:100%;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text-soft);font-size:10px;font-weight:700;cursor:pointer;transition:.2s}
-.nav button.active{background:var(--hero);color:#fff;box-shadow:0 8px 18px color-mix(in srgb, var(--hero) 30%, transparent)}
+.nav{ height:72px; margin:10px; margin-bottom:calc(10px + env(safe-area-inset-bottom)); background:var(--nav-bg); backdrop-filter:blur(24px); border:1.5px solid var(--card-border); border-radius:20px; display:flex;align-items:center;padding:6px;gap:5px;z-index:30; flex-shrink:0 }
+.nav button{flex:1;height:100%;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text-soft);font-size:10px;font-weight:700;cursor:pointer;touch-action:manipulation}
+.nav button.active{background:var(--hero);color:#fff}
 .nav button .icon{font-size:19px}
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#134E4A;color:#fff;padding:10px 18px;border-radius:12px;font-size:11px;font-weight:800;z-index:999;box-shadow:0 10px 30px rgba(0,0,0,.2);display:none}
-.toast.show{display:block;animation:fadeIn .2s}
-@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+#syncStatus{position:absolute;top:60px;left:10px;right:10px;z-index:20;text-align:center;pointer-events:none;font-size:9px;color:var(--text-soft)}
+/* زر المسح */
+#clearCacheBtn{position:absolute;top:10px;left:10px;z-index:50;background:#fef2f2;color:#ef4444;border:1px solid #fecaca;border-radius:8px;padding:4px 8px;font-size:8px;font-weight:900;display:none}
 </style>
 </head>
 <body>
 <div class="phone-shell">
   <div class="header">
     <b>نظام عمر</b>
-    <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="تغيير الثيم">
-      <div class="knob" id="themeKnob">☀️</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="clearCacheBtn" onclick="clearAllCache()">مسح الكاش</button>
+      <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()"><div class="knob" id="themeKnob">☀️</div></div>
     </div>
   </div>
+  <div id="syncStatus"></div>
   <div class="pageWrap">
-    <iframe data-page="daily.html" src="daily.html" class="page active" title="daily"></iframe>
-    <iframe data-page="attendance.html" src="about:blank" class="page" title="attendance"></iframe>
-    <iframe data-page="tasks.html" src="about:blank" class="page" title="tasks"></iframe>
+    <iframe data-page="daily.html" src="daily.html?v=19" class="page active" title="daily" id="frame-daily"></iframe>
+    <iframe data-page="attendance.html" src="about:blank" class="page" title="attendance" id="frame-att"></iframe>
+    <iframe data-page="tasks.html" src="about:blank" class="page" title="tasks" id="frame-tasks"></iframe>
   </div>
   <nav class="nav">
     <button class="active" data-page="daily.html" onclick="switchPage('daily.html',this)"><span class="icon">📊</span><span>اليومية</span></button>
@@ -61,144 +52,113 @@ body{display:flex;justify-content:center;align-items:flex-start;background:var(-
     <button data-page="tasks.html" onclick="switchPage('tasks.html',this)"><span class="icon">✓</span><span>المهام</span></button>
   </nav>
 </div>
-<div class="toast" id="exitToast">اضغط مرة أخرى للخروج</div>
+<script src="drive.js?v=19"></script>
+<script src="drive-sync.js?v=19"></script>
 <script>
-// ثيمين فقط
-const themes = {
-  teal: {'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E','--accent':'#14B8A6','--nav-bg':'rgba(255,255,255,0.92)'},
-  dark: {'--bg':'#020617','--bg-soft':'#1E293B','--card':'#0F172A','--card-border':'#1E293B','--text':'#F1F5F9','--text-soft':'#94A3B8','--hero':'#0F766E','--accent':'#14B8A6','--nav-bg':'rgba(15,23,42,0.92)'}
-};
+// لو فيه كاش قديم عالق على الموبايل - اظهر زر المسح
+try{
+  if(localStorage.getItem('omar_old_cache_detected')){
+    document.getElementById('clearCacheBtn').style.display='block';
+  }
+}catch(e){}
 
+function clearAllCache(){
+  if(!confirm('امسح الكاش القديم واعمل ريفرش؟')) return;
+  try{
+    if('caches' in window){
+      caches.keys().then(k=>k.forEach(cache=>caches.delete(cache)));
+    }
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
+    }
+    localStorage.removeItem('omar_old_cache_detected');
+    location.reload(true);
+  }catch(e){ location.reload(true); }
+}
+
+const themes = {
+  teal: {'--bg':'#F0FDFA','--bg-soft':'#CCFBF1','--card':'#FFFFFF','--card-border':'#5EEAD4','--text':'#134E4A','--text-soft':'#0D9488','--hero':'#0F766E','--nav-bg':'rgba(255,255,255,0.92)'},
+  dark: {'--bg':'#020617','--bg-soft':'#1E293B','--card':'#0F172A','--card-border':'#1E293B','--text':'#F1F5F9','--text-soft':'#94A3B8','--hero':'#0F766E','--nav-bg':'rgba(15,23,42,0.92)'}
+};
 function applyTheme(name, broadcast=true){
   const t = themes[name] || themes.teal;
   Object.entries(t).forEach(([k,v])=> document.documentElement.style.setProperty(k,v));
   try{ localStorage.setItem('omar_theme', name); }catch(e){}
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.content = t['--hero'];
   document.body.dataset.theme = name;
   const toggle = document.getElementById('themeToggle');
   const knob = document.getElementById('themeKnob');
   if(toggle){ toggle.className = 'theme-toggle' + (name==='dark'?' dark':''); }
   if(knob){ knob.textContent = name==='dark'?'🌙':'☀️'; }
   if(broadcast){
-    try{
-      document.querySelectorAll('iframe.page').forEach(f=>{
-        try{
-          if(f.contentWindow && f.contentWindow.applyTheme){
-            f.contentWindow.applyTheme(name, false);
-          } else if(f.contentWindow){
-            Object.entries(t).forEach(([k,v])=> f.contentWindow.document.documentElement.style.setProperty(k,v));
-          }
-        }catch(e){}
-      });
-    }catch(e){}
+    document.querySelectorAll('iframe.page').forEach(f=>{
+      try{
+        if(f.contentWindow && f.contentWindow.applyTheme) f.contentWindow.applyTheme(name, false);
+        else if(f.contentWindow) Object.entries(t).forEach(([k,v])=> f.contentWindow.document.documentElement.style.setProperty(k,v));
+      }catch(e){}
+    });
   }
 }
 function toggleTheme(){
   const cur = localStorage.getItem('omar_theme')||'teal';
   const next = cur==='teal' ? 'dark' : 'teal';
   applyTheme(next, true);
-  if(navigator.vibrate) navigator.vibrate(10);
 }
 window.applyTheme = applyTheme;
 
 const frames=document.querySelectorAll('.page');
 let currentPage='daily.html';
-let lastBackTime=0;
-
-function switchPage(name,btn, push=true){
-  if(currentPage===name && document.querySelector('.page.active')?.src.includes(name)) return;
+function switchPage(name,btn){
+  if(currentPage===name) return;
   currentPage=name;
   frames.forEach(f=>{
     const is=f.dataset.page===name;
     f.classList.toggle('active',is);
     if(is && f.src.includes('about:blank')){
-      f.src=name;
-      f.onload=()=>{ 
-        try{ 
-          const cur=localStorage.getItem('omar_theme')||'teal';
-          if(f.contentWindow && f.contentWindow.applyTheme) f.contentWindow.applyTheme(cur,false);
-          else {
-            const t = themes[cur]||themes.teal;
-            Object.entries(t).forEach(([k,v])=> f.contentWindow.document.documentElement.style.setProperty(k,v));
-          }
-        }catch(e){}
-      };
-    } else if(is){
-      try{
-        const cur=localStorage.getItem('omar_theme')||'teal';
-        if(f.contentWindow && f.contentWindow.applyTheme) f.contentWindow.applyTheme(cur,false);
-      }catch(e){}
+      f.src=name+"?v=19";
+      f.onload=()=>{ try{ const cur=localStorage.getItem('omar_theme')||'teal'; if(f.contentWindow && f.contentWindow.applyTheme) f.contentWindow.applyTheme(cur,false); }catch(e){} };
     }
   });
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  else {
-    const targetBtn=document.querySelector(`.nav button[data-page="${name}"]`);
-    if(targetBtn) targetBtn.classList.add('active');
-  }
-  if(push){
-    try{ history.pushState({page:name}, '', '#'+name); }catch(e){}
-  }
-  if(navigator.vibrate) navigator.vibrate(10);
 }
 
-function handleBack(){
-  const activeFrame=document.querySelector('.page.active');
-  if(activeFrame && activeFrame.contentWindow){
+applyTheme(localStorage.getItem('omar_theme')||'teal');
+
+// تسجيل السيرفس ووركر الجديد وامسح القديم
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(rs=>{
+    rs.forEach(r=>{
+      if(r.active && r.active.scriptURL && !r.active.scriptURL.includes('v19')){
+        try{ r.unregister(); localStorage.setItem('omar_old_cache_detected','1'); document.getElementById('clearCacheBtn').style.display='block'; }catch(e){}
+      }
+    });
+  });
+  navigator.serviceWorker.register('./sw.js?v=19').then(()=>console.log('SW v19')).catch(()=>{});
+}
+
+// مزامنة خلفية بدون block
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
     try{
-      const cw=activeFrame.contentWindow;
-      if(cw.document){
-        const openModals=cw.document.querySelectorAll('.modal.open, .custom-dialog.open');
-        for(let m of openModals){
-          if(m.classList.contains('open') || m.style.display==='flex'){
-            if(cw.closeFab) { cw.closeFab(); return true; }
-            if(cw.closeAdd) { cw.closeAdd(); return true; }
-            if(cw.closeModal) { cw.closeModal(); return true; }
-            if(cw.closeTaskModal) { cw.closeTaskModal(); return true; }
-            m.classList.remove('open'); m.style.display='none'; return true;
+      if(window.SCRIPT_URL){
+        fetch(window.SCRIPT_URL + "?fileName=all_project_data.json&t=" + Date.now())
+        .then(r=>r.json()).then(json=>{
+          let payload = json.data || json;
+          let content = payload.content || payload;
+          if(content && content.daily){
+            localStorage.setItem('omar_tx_v3', JSON.stringify(content.daily));
+            try{
+              let f=document.getElementById('frame-daily');
+              if(f && f.contentWindow && f.contentWindow.refreshCurrent) f.contentWindow.refreshCurrent();
+            }catch(e){}
           }
-        }
+        }).catch(e=>{});
       }
     }catch(e){}
-  }
-  if(currentPage!=='daily.html'){
-    switchPage('daily.html', null, true);
-    return true;
-  }
-  const now=Date.now();
-  if(now - lastBackTime < 2000){ return false; }
-  else {
-    lastBackTime=now;
-    const toast=document.getElementById('exitToast');
-    toast.classList.add('show');
-    setTimeout(()=>toast.classList.remove('show'), 2000);
-    if(navigator.vibrate) navigator.vibrate(50);
-    return true;
-  }
-}
-window.addEventListener('popstate', (e)=>{
-  if(e.state && e.state.page){
-    if(e.state.page!==currentPage){ handleBack(); }
-  } else {
-    const shouldPrevent=handleBack();
-    if(shouldPrevent){
-      try{ history.pushState({page:currentPage}, '', '#'+currentPage); }catch(e){}
-    }
-  }
+  }, 1200);
 });
-try{
-  history.replaceState({page:'daily.html'}, '', '#daily.html');
-  history.pushState({page:'daily.html'}, '', '#daily.html');
-}catch(e){}
-applyTheme(localStorage.getItem('omar_theme')||'teal');
-if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(()=>console.log('✅ PWA Ready'));} 
+
 window.switchPage=switchPage;
-window.addEventListener('message', (e)=>{
-  if(e.data && e.data.type==='pushState'){
-    try{ history.pushState(e.data.state, '', e.data.url||'#'+currentPage); }catch(err){}
-  }
-});
 </script>
 </body>
 </html>
