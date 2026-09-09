@@ -197,10 +197,10 @@ body{display:flex;flex-direction:column}
 <div id="hiddenCodeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)"><div style="background:var(--card);width:100%;max-width:340px;border-radius:20px;padding:18px;border:1.5px solid var(--card-border)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><b style="font-size:13px">🔒 إعدادات المخفي</b><button onclick="closeHiddenCodeModal()" style="border:none;background:var(--bg-soft);width:30px;height:30px;border-radius:8px">✕</button></div><div style="background:#111;color:#fff;border-radius:12px;padding:12px;margin-bottom:12px"><div style="font-size:9px;opacity:.7">الكود الحالي</div><div id="hiddenCurrentCode" style="font-size:18px;font-weight:900;letter-spacing:2px;margin-top:4px">****</div><div style="font-size:8px;opacity:.6;margin-top:6px">اضغط على العين عشان تظهره</div></div><div style="display:flex;gap:6px;margin-bottom:10px"><input id="hiddenNewCodeInput" placeholder="الكود الجديد" type="password" class="input-pro" style="flex:1;font-size:16px;letter-spacing:2px"><button onclick="toggleHiddenCodeEye()" style="border:1.5px solid var(--card-border);background:var(--bg-soft);border-radius:10px;padding:8px 12px">👁️</button></div><div style="display:flex;gap:8px"><button onclick="closeHiddenCodeModal()" style="flex:1;background:var(--bg-soft);border:1.5px solid var(--card-border);border-radius:12px;padding:11px;font-weight:800">إلغاء</button><button onclick="saveHiddenCodeInside()" style="flex:1;background:#111;color:#fff;border:none;border-radius:12px;padding:11px;font-weight:900">💾 حفظ الكود</button></div><div style="font-size:8px;color:var(--text-soft);margin-top:10px;text-align:center">💡 الكود ده بس اللي بيفتح المخفي، محدش هيشوفه بره</div></div></div>
 <div id="toastContainer"></div>
 <script>
-// إعدادات المزامنة مع جوجل درايف (ملف واحد موحد لجميع البيانات)
+// إعدادات المزامنة مع جوجل درايف (ملف واحد موحد لجميع البيانات) بالرابط الجديد
 const DRIVE_CONFIG = {
   FILE_NAME: 'all_project_data.json',
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxfkSOK4vwGDLE4_AkZTkyjJYV8Tvhl8Qmi5hkH8PUVFsvt80_YxbVdd5_lUt2QPqK3/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz3TyAm_BWEzlgEcqjqYA6SaBMjoLzN3j51Ewb9vp6UZNL8yJespFDUKQxWA5IOvrvW/exec',
   DEBOUNCE: 1500
 };
 
@@ -229,10 +229,14 @@ function hashData(d){
   try{ return JSON.stringify(d).length + '_' + (d.tasks ? d.tasks.length : 0); }catch(e){ return ''; }
 }
 
+// دالة سحب البيانات التلقائي (Pull) المحدثة لتقرأ من الدرايف صح
 async function loadFromDrive(force=false){
   try{
     const res = await fetch(DRIVE_CONFIG.APPS_SCRIPT_URL + '?fileName=all_project_data.json&t=' + Date.now());
-    const data = await res.json();
+    const resData = await res.json();
+    let payload = resData.data || resData;
+    let data = payload.content || payload;
+    
     if(data){
       if(data.tasks && Array.isArray(data.tasks) && data.tasks.length > 0){
         localStorage.setItem('omar_tasks_v1', JSON.stringify(data.tasks));
@@ -241,6 +245,12 @@ async function loadFromDrive(force=false){
       if(data.cats && Array.isArray(data.cats) && data.cats.length > 0){
         localStorage.setItem('omar_cats_v1', JSON.stringify(data.cats));
         cats = data.cats;
+      }
+      if(data.attendance || data.attendance_data){
+        localStorage.setItem('att_fixed_final', JSON.stringify(data.attendance || data.attendance_data));
+      }
+      if(data.daily){
+        localStorage.setItem('omar_tx_v3', JSON.stringify(data.daily));
       }
       renderManagerLists();
       render();
@@ -402,7 +412,7 @@ function render(){
       board.innerHTML=settingsCard+`<div style="text-align:center;padding:30px 10px;color:var(--text-soft)"><div style="font-size:40px">🔒</div><div style="font-size:12px;font-weight:800;margin-top:8px">المخفي فاضي</div><div style="font-size:9px;margin-top:4px">دوس + إضافة عشان تضيف مهمة سرية</div></div>`;
       return;
     } else {
-      board.innerHTML=settingsCard + list.map(t=>{ let prog=getProgress(t); let catObj=cats.find(c=>c.name===t.cat); let emoji=catObj?catObj.emoji:(t.cat==='مخفي'?'🔒':'📌'); let bg=t.color||'var(--hero)'; return `<div class="task-outer"><div class="task-card" onclick="editTask('${t.id}')"><div class="task-progress-bg" style="width:${prog}%;background:${bg}"></div><div class="task-card-content"><div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--bg-soft);border:1px solid var(--card-border);flex-shrink:0">${emoji}</div><div class="task-info"><b style="${t.done?'text-decoration:line-through;opacity:.6':''}">${t.text||'بدون عنوان'}</b><small>${t.cat||'عام'} • ${t.priority||'عادي'} ${t.subs?.length?`• ${t.subs.filter(s=>s.done).length}/${t.subs.length}`:''} ${prog?`• ${prog}%`:''} ${t.reminder?.time?'• 🔔':''}</small></div><div class="task-check ${t.done?'done':''}" onclick="event.stopPropagation();toggleDone('${t.id}')">${t.done?'✓':''}</div></div></div><button class="ext-del" onclick="openProDelete('${t.id}')">✕</button></div>`; }).join('');
+      board.innerHTML=settingsCard + list.map(t=>{ let prog=getProgress(t); let catObj=cats.find(c=>c.name===t.cat); let emoji=catObj?catObj.emoji:(t.cat==='مخفي'?'🔒':'📌'); let bg=t.color||'var(--hero)'; return `<div class="task-outer"><div class="task-card" onclick="editTask('${t.id}')"><div class="task-progress-bg" style="width:${prog}%;background:${bg}"></div><div class="task-card-content"><div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--bg-soft);border:1.5px solid var(--card-border);flex-shrink:0">${emoji}</div><div class="task-info"><b style="${t.done?'text-decoration:line-through;opacity:.6':''}">${t.text||'بدون عنوان'}</b><small>${t.cat||'عام'} • ${t.priority||'عادي'} ${t.subs?.length?`• ${t.subs.filter(s=>s.done).length}/${t.subs.length}`:''} ${prog?`• ${prog}%`:''} ${t.reminder?.time?'• 🔔':''}</small></div><div class="task-check ${t.done?'done':''}" onclick="event.stopPropagation();toggleDone('${t.id}')">${t.done?'✓':''}</div></div></div><button class="ext-del" onclick="openProDelete('${t.id}')">✕</button></div>`; }).join('');
       return;
     }
   }
@@ -419,7 +429,7 @@ function render(){
       <div class="task-card" onclick="editTask('${t.id}')">
         <div class="task-progress-bg" style="width:${prog}%;background:${bg}"></div>
         <div class="task-card-content">
-          <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--bg-soft);border:1px solid var(--card-border);flex-shrink:0">${emoji}</div>
+          <div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--bg-soft);border:1.5px solid var(--card-border);flex-shrink:0">${emoji}</div>
           <div class="task-info"><b style="${t.done?'text-decoration:line-through;opacity:.6':''}">${t.text||'بدون عنوان'}</b><small>${t.cat||'عام'} • ${t.priority||'عادي'} ${t.subs?.length?`• ${t.subs.filter(s=>s.done).length}/${t.subs.length}`:''} ${prog?`• ${prog}%`:''} ${t.reminder?.time?'• 🔔':''}</small></div>
           <div class="task-check ${t.done?'done':''}" onclick="event.stopPropagation();toggleDone('${t.id}')">${t.done?'✓':''}</div>
         </div>
