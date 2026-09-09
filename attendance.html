@@ -37,7 +37,7 @@ body{padding:0 6px 0 6px;min-height:100dvh;margin:0;zoom:1.16}
 <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px">
 <div style="display:flex;gap:4px;align-items:center"><div style="font-size:9px;font-weight:900">⏱️ الحضور</div><button onclick="toggleTop()" id="toggleBtn" style="background:var(--bg-soft);border:1px solid var(--card-border);padding:2px 6px;border-radius:999px;font-size:7.5px;font-weight:700;color:var(--text)">▲ إخفاء</button></div>
 <div style="display:flex;gap:2px;align-items:center">
-<button onclick="syncWithDrive()" style="background:var(--hero);color:#fff;border:none;padding:2px 8px;border-radius:999px;font-size:7.5px;font-weight:900;cursor:pointer">🔄 مزامنة</button>
+<div id="syncStatus" class="en" style="font-size:7.5px;background:var(--bg-soft);color:var(--text-soft);padding:2px 6px;border-radius:999px">☁️ متزامن</div>
 <div id="monthLabel" class="en" style="font-size:8.5px;background:var(--hero);color:#fff;padding:2px 6px;border-radius:999px;font-weight:900">9 / 2026</div><button onclick="changeMonth(-1)" style="background:var(--card);border:1px solid var(--card-border);width:21px;height:21px;border-radius:5px;font-weight:900;font-size:11px">‹</button><button onclick="changeMonth(1)" style="background:var(--card);border:1px solid var(--card-border);width:21px;height:21px;border-radius:5px;font-weight:900;font-size:11px">›</button><div id="clock" class="en" style="font-size:7.5px;background:var(--bg-soft);padding:2px 5px;border-radius:999px">00:00:00</div></div>
 </div>
 <div id="topInfo" style="margin:0;padding:0">
@@ -71,8 +71,7 @@ body{padding:0 6px 0 6px;min-height:100dvh;margin:0;zoom:1.16}
 
 <div id="proModal" onclick="if(event.target==this)closeModal()"><div class="modal-box"><div style="padding:14px;text-align:center"><div id="modalIcon" style="width:40px;height:40px;background:#FFF1F2;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:19px">🗑️</div><div id="modalTitle" style="font-weight:900;font-size:12px;color:var(--text)">تمسح حضور اليوم ده؟</div><div id="modalDesc" style="font-size:9px;color:var(--text-soft);margin-top:3px">هيتم مسح الحضور والانصراف بس</div></div><div style="display:flex;gap:6px;padding:8px;background:var(--bg-soft);border-top:1px solid var(--card-border)"><button onclick="closeModal()" style="flex:1;background:var(--card);border:1px solid var(--card-border);padding:9px;border-radius:8px;font-weight:800;font-size:9px">إلغاء</button><button id="modalOk" onclick="confirmModal()" style="flex:1;background:#ef4444;color:#fff;border:none;padding:9px;border-radius:8px;font-weight:900;font-size:9px">مسح ✓</button></div></div></div>
 <script>
-// تم تحديث رابط الـ Web App الموحد الجديد
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxfkSOK4vwGDLE4_AkZTkyjJYV8Tvhl8Qmi5hkH8PUVFsvt80_YxbVdd5_lUt2QPqK3/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3TyAm_BWEzlgEcqjqYA6SaBMjoLzN3j51Ewb9vp6UZNL8yJespFDUKQxWA5IOvrvW/exec";
 
 let modalAction=null, modalKey=null;
 function openClearModal(key){ modalAction='clear'; modalKey=key; document.getElementById('proModal').classList.add('show'); }
@@ -80,40 +79,34 @@ function closeModal(){ document.getElementById('proModal').classList.remove('sho
 function confirmModal(){ if(modalAction==='clear'){ doClearDay(modalKey); } closeModal(); }
 let topHidden=localStorage.getItem('att_top_hidden')==='1';let curDate=new Date();let curY=curDate.getFullYear();let curM=curDate.getMonth();let activeKey=localStorage.getItem('att_active_month');if(activeKey){let p=activeKey.split('-');curY=parseInt(p[0]);curM=parseInt(p[1])-1;}let closed=JSON.parse(localStorage.getItem('att_closed')||'{}');
 
-// دالة الحفظ التلقائي في الدرايف
+// نظام الحفظ والمزامنة التلقائية في الخلفية (من غير زرار)
+let syncTimer = null;
 function saveToDrive() {
   if (WEB_APP_URL.includes("حط_رابط")) return;
-  let allData = {
-    attendance: JSON.parse(localStorage.getItem('att_fixed_final')||'{}'),
-    hols: JSON.parse(localStorage.getItem('att_hols_fixed')||'{}'),
-    notes: JSON.parse(localStorage.getItem('att_notes')||'{}')
-  };
   
-  fetch(WEB_APP_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fileName: "all_project_data.json", content: allData })
-  }).catch(err => console.log("خطأ في الحفظ:", err));
-}
+  // تغيير مؤشر الحالة لجاري الحفظ
+  let st = document.getElementById('syncStatus');
+  if(st) { st.textContent = '⏳ جاري الحفظ...'; st.style.color = '#f59e0b'; }
 
-// دالة السحب من الدرايف
-function syncWithDrive() {
-  if (WEB_APP_URL.includes("حط_رابط")) {
-    alert("برجاء وضع رابط الـ Web App في كود JavaScript أولاً!");
-    return;
-  }
-  fetch(WEB_APP_URL + "?fileName=all_project_data.json")
-    .then(res => res.json())
-    .then(data => {
-      if(data && data.attendance) {
-        localStorage.setItem('att_fixed_final', JSON.stringify(data.attendance));
-        localStorage.setItem('att_hols_fixed', JSON.stringify(data.hols || {}));
-        localStorage.setItem('att_notes', JSON.stringify(data.notes || {}));
-        location.reload();
-      }
-    })
-    .catch(err => alert("فشل الاتصال بالدرايف!"));
+  if(syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    let allData = {
+      attendance: JSON.parse(localStorage.getItem('att_fixed_final')||'{}'),
+      hols: JSON.parse(localStorage.getItem('att_hols_fixed')||'{}'),
+      notes: JSON.parse(localStorage.getItem('att_notes')||'{}')
+    };
+    
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName: "all_project_data.json", content: allData })
+    }).then(() => {
+      if(st) { st.textContent = '☁️ متزامن'; st.style.color = 'var(--text-soft)'; }
+    }).catch(err => {
+      if(st) { st.textContent = '⚠️ خطأ بالربط'; st.style.color = '#ef4444'; }
+    });
+  }, 1000); // مهلة ثانية واحدة لتجميع التعديلات ورفعها مرة واحدة بذكاء
 }
 
 function toggleTop(){ topHidden=!topHidden; localStorage.setItem('att_top_hidden',topHidden?'1':'0'); applyTop(); }
